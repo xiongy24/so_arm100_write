@@ -1,0 +1,193 @@
+[0.062s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--symlink-install']
+[0.062s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=True, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=16, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7c8173d62a10>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7c8173d62500>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7c8173d62500>>)
+[0.179s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.179s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.179s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.179s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.179s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.179s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.179s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/ubuntu22/so_arm100_write/ros2_ws'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[0.199s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extensions ['ignore', 'ignore_ament_install']
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extension 'ignore'
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extension 'ignore_ament_install'
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extensions ['colcon_pkg']
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extension 'colcon_pkg'
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extensions ['colcon_meta']
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extension 'colcon_meta'
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extensions ['ros']
+[0.200s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_description) by extension 'ros'
+[0.201s] DEBUG:colcon.colcon_core.package_identification:Package 'src/arm_description' with type 'ros.ament_cmake' and name 'arm_description'
+[0.201s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extensions ['ignore', 'ignore_ament_install']
+[0.201s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extension 'ignore'
+[0.201s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extension 'ignore_ament_install'
+[0.201s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extensions ['colcon_pkg']
+[0.201s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extension 'colcon_pkg'
+[0.202s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extensions ['colcon_meta']
+[0.202s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extension 'colcon_meta'
+[0.202s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extensions ['ros']
+[0.202s] Level 1:colcon.colcon_core.package_identification:_identify(src/arm_planning) by extension 'ros'
+[0.202s] DEBUG:colcon.colcon_core.package_identification:Package 'src/arm_planning' with type 'ros.ament_python' and name 'arm_planning'
+[0.202s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.202s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.202s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.202s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.202s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.213s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.213s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.214s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 3 installed packages in /home/ubuntu22/so_arm100_write/ros2_ws/install
+[0.215s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 378 installed packages in /opt/ros/humble
+[0.216s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'cmake_args' from command line to 'None'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'cmake_target' from command line to 'None'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'cmake_clean_cache' from command line to 'False'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'cmake_clean_first' from command line to 'False'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'cmake_force_configure' from command line to 'False'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'ament_cmake_args' from command line to 'None'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'catkin_cmake_args' from command line to 'None'
+[0.241s] Level 5:colcon.colcon_core.verb:set package 'arm_description' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.241s] DEBUG:colcon.colcon_core.verb:Building package 'arm_description' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description', 'merge_install': False, 'path': '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_description', 'symlink_install': True, 'test_result_base': None}
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'cmake_args' from command line to 'None'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'cmake_target' from command line to 'None'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'cmake_clean_cache' from command line to 'False'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'cmake_clean_first' from command line to 'False'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'cmake_force_configure' from command line to 'False'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'ament_cmake_args' from command line to 'None'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'catkin_cmake_args' from command line to 'None'
+[0.242s] Level 5:colcon.colcon_core.verb:set package 'arm_planning' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.242s] DEBUG:colcon.colcon_core.verb:Building package 'arm_planning' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning', 'merge_install': False, 'path': '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_planning', 'symlink_install': True, 'test_result_base': None}
+[0.242s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.243s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.243s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_description' with build type 'ament_cmake'
+[0.243s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_description'
+[0.244s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.244s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.244s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.246s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_planning' with build type 'ament_python'
+[0.246s] Level 1:colcon.colcon_core.shell:create_environment_hook('arm_planning', 'ament_prefix_path')
+[0.247s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/hook/ament_prefix_path.ps1'
+[0.247s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/hook/ament_prefix_path.dsv'
+[0.247s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/hook/ament_prefix_path.sh'
+[0.248s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.248s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.253s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble /home/ubuntu22/.local/bin/cmake --build /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description -- -j16 -l16
+[0.425s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_planning'
+[0.425s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.425s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.428s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble /home/ubuntu22/.local/bin/cmake --build /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description -- -j16 -l16
+[0.479s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble /home/ubuntu22/.local/bin/cmake --install /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description
+[0.534s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(arm_description)
+[0.534s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble /home/ubuntu22/.local/bin/cmake --install /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description
+[0.536s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description' for CMake module files
+[0.537s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description' for CMake config files
+[0.537s] Level 1:colcon.colcon_core.shell:create_environment_hook('arm_description', 'cmake_prefix_path')
+[0.537s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/hook/cmake_prefix_path.ps1'
+[0.538s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/hook/cmake_prefix_path.dsv'
+[0.538s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/hook/cmake_prefix_path.sh'
+[0.539s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/bin'
+[0.539s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/lib/pkgconfig/arm_description.pc'
+[0.539s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/lib/python3.10/site-packages'
+[0.539s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/bin'
+[0.540s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.ps1'
+[0.540s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.dsv'
+[0.541s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.sh'
+[0.542s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.bash'
+[0.542s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.zsh'
+[0.543s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/colcon-core/packages/arm_description)
+[0.544s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(arm_description)
+[0.544s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description' for CMake module files
+[0.544s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description' for CMake config files
+[0.544s] Level 1:colcon.colcon_core.shell:create_environment_hook('arm_description', 'cmake_prefix_path')
+[0.545s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/hook/cmake_prefix_path.ps1'
+[0.545s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/hook/cmake_prefix_path.dsv'
+[0.545s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/hook/cmake_prefix_path.sh'
+[0.545s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/bin'
+[0.545s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/lib/pkgconfig/arm_description.pc'
+[0.545s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/lib/python3.10/site-packages'
+[0.546s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/bin'
+[0.546s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.ps1'
+[0.546s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.dsv'
+[0.546s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.sh'
+[0.546s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.bash'
+[0.547s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.zsh'
+[0.547s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/colcon-core/packages/arm_description)
+[0.715s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning': PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build --no-deps symlink_data
+[1.061s] Level 1:colcon.colcon_core.shell:create_environment_hook('arm_planning', 'pythonpath_develop')
+[1.061s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/share/arm_planning/hook/pythonpath_develop.ps1'
+[1.062s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning' returned '0': PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build --no-deps symlink_data
+[1.062s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/share/arm_planning/hook/pythonpath_develop.dsv'
+[1.062s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/share/arm_planning/hook/pythonpath_develop.sh'
+[1.062s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning' for CMake module files
+[1.063s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning' for CMake config files
+[1.063s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib'
+[1.063s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/bin'
+[1.063s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/pkgconfig/arm_planning.pc'
+[1.063s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages'
+[1.063s] Level 1:colcon.colcon_core.shell:create_environment_hook('arm_planning', 'pythonpath')
+[1.063s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/hook/pythonpath.ps1'
+[1.064s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/hook/pythonpath.dsv'
+[1.064s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/hook/pythonpath.sh'
+[1.064s] Level 1:colcon.colcon_core.environment:checking '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/bin'
+[1.064s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(arm_planning)
+[1.064s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/package.ps1'
+[1.065s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/package.dsv'
+[1.065s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/package.sh'
+[1.065s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/package.bash'
+[1.065s] INFO:colcon.colcon_core.shell:Creating package script '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning/package.zsh'
+[1.066s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/colcon-core/packages/arm_planning)
+[1.066s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[1.066s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[1.066s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[1.066s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[1.069s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[1.069s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[1.069s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[1.075s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[1.076s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/ubuntu22/so_arm100_write/ros2_ws/install/local_setup.ps1'
+[1.076s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/ubuntu22/so_arm100_write/ros2_ws/install/_local_setup_util_ps1.py'
+[1.077s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/ubuntu22/so_arm100_write/ros2_ws/install/setup.ps1'
+[1.077s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/ubuntu22/so_arm100_write/ros2_ws/install/local_setup.sh'
+[1.078s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/ubuntu22/so_arm100_write/ros2_ws/install/_local_setup_util_sh.py'
+[1.078s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/ubuntu22/so_arm100_write/ros2_ws/install/setup.sh'
+[1.079s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/ubuntu22/so_arm100_write/ros2_ws/install/local_setup.bash'
+[1.079s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/ubuntu22/so_arm100_write/ros2_ws/install/setup.bash'
+[1.079s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/ubuntu22/so_arm100_write/ros2_ws/install/local_setup.zsh'
+[1.080s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/ubuntu22/so_arm100_write/ros2_ws/install/setup.zsh'

@@ -4,6 +4,43 @@
 from arm_controller import ArmController
 import numpy as np
 import time
+import rclpy
+from rclpy.node import Node
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Point
+
+class RectangleVisualizer(Node):
+    def __init__(self):
+        super().__init__('rectangle_visualization')
+        self.marker_pub = self.create_publisher(Marker, '/visualization_marker', 10)
+        time.sleep(0.5)  # 等待发布者初始化
+        
+    def visualize_rectangle(self, points, z_height):
+        marker = Marker()
+        marker.header.frame_id = "base_link"
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.ns = "rectangle_path"
+        marker.id = 0
+        marker.type = Marker.LINE_STRIP
+        marker.action = Marker.ADD
+        
+        # 设置标记的尺寸和颜色
+        marker.scale.x = 0.002  # 线宽2mm
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        marker.color.a = 1.0
+        
+        # 添加路径点
+        marker.points = []
+        for x, y in points:
+            point = Point()
+            point.x = x
+            point.y = y
+            point.z = z_height
+            marker.points.append(point)
+            
+        self.marker_pub.publish(marker)
 
 def generate_rectangle_points(center_x, center_y, width, height, num_points_per_side=20):
     """生成矩形的路径点"""
@@ -57,8 +94,12 @@ def check_joint_limits(angles, joint_limits):
     return True
 
 def main():
-    arm = ArmController()
+    # 初始化ROS2节点
+    rclpy.init()
     
+    arm = ArmController()
+    visualizer = RectangleVisualizer()
+
     try:
         # 连接机械臂
         print("正在连接机械臂...")
@@ -92,6 +133,13 @@ def main():
         # 生成矩形轨迹点
         print("\n生成矩形轨迹...")
         points = generate_rectangle_points(center_x, center_y, width, height)
+        
+        # 在RVIZ中可视化矩形轨迹
+        print("在RVIZ中显示矩形轨迹...")
+        visualizer.visualize_rectangle(points, z_height)
+        
+        # 等待用户确认
+        input("轨迹已在RVIZ中显示，按回车键继续执行实际运动...")
         
         # 预检查所有位置
         print("\n预检查轨迹点...")

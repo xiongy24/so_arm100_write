@@ -1,0 +1,3 @@
+[console_scripts]
+rectangle_visualizer = arm_visualization.rectangle_visualizer:main
+
