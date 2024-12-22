@@ -596,16 +596,271 @@
    - 实现基本笔画功能
    - 开发完整汉字书写功能
 
-### 2024-12-22 22:39
-#### 进展记录系统建立
-1. 检查了现有的进展记录文件
-2. 理解了任务的整体进展情况
-3. 建立了进展记录更新机制：每次对话后都会更新记录，包含：
-   - 完成的工作
-   - 遇到的问题和解决方案
-   - 下一步计划
+
+### 2024-12-22 22:41
+#### 问题：机械臂运动不正确
+运行 `test_draw_rectangle.py` 时，机械臂在移动到初始位置后，开始画矩形时出现大幅度运动。
+
+#### 问题分析
+1. DH参数设置问题：
+   - 当前DH参数可能与实际机械臂物理结构不完全匹配
+   - 需要重新测量和验证每个关节的参数
+
+2. 笔尖偏移问题：
+   - 当前笔尖偏移：[0.0071456, -0.051425, 0.040525]
+   - 这个偏移量可能不准确，导致末端执行器位置计算错误
+
+3. 逆运动学求解问题：
+   - 使用的雅可比矩阵数值迭代法可能不够稳定
+   - 关节权重设置：[1.0, 1.0, 1.0, 0.8, 0.8, 0.5] 可能不合适
+   - 阻尼因子0.1可能需要调整
+
+4. 工作空间问题：
+   - 矩形参数设置可能不在机械臂的最佳工作空间内
+   - 当前设置：中心点(0, 0.15)m，高度0.10m
+   - 尺寸：6cm × 4cm
+
+#### 解决方案
+1. DH参数修正：
+   - 仔细测量每个关节的实际参数
+   - 使用正运动学验证参数准确性
+
+2. 笔尖偏移校准：
+   - 使用机械臂标定方法重新测量笔尖偏移
+   - 在多个位置进行测试验证
+
+3. 逆运动学优化：
+   - 增加阻尼因子到0.5，提高稳定性
+   - 调整关节权重为[1.0, 1.0, 0.8, 0.6, 0.4, 0.2]
+   - 添加额外的姿态约束，确保笔尖始终垂直
+
+4. 工作空间调整：
+   - 将写字平面降低到5cm高度
+   - 缩小矩形尺寸到4cm × 3cm
+   - 将中心点移近到10cm处
 
 #### 下一步计划
-1. 继续开发运动控制模块
-2. 实现轨迹执行控制器
-3. 进行仿真测试
+1. 修改 `motion_controller.py` 中的DH参数和逆运动学参数
+2. 开发校准程序，用于测量笔尖偏移
+3. 缩小测试范围，验证修改效果
+
+### 2024-12-22 22:47
+#### 策略调整：使用原始文件
+发现可以直接使用原始的模型文件，这样可以避免路径问题。
+
+#### 解决方案
+1. 删除之前创建的文件：
+   ```bash
+   rm -rf urdf meshes launch config
+   ```
+
+2. 复制原始文件：
+   ```bash
+   cp -r model/so_arm100_write/. ros2_ws/src/arm_description/
+   ```
+
+3. 将ROS1的launch文件转换为ROS2格式：
+   - 创建Python版本的launch文件
+   - 使用ROS2的launch API
+   - 保持原有的文件结构和路径
+
+#### 下一步计划
+1. 验证机械臂模型显示
+2. 开始MoveIt2配置
+3. 开发轨迹规划节点
+
+### 2024-12-22 22:59
+#### 运行步骤整理
+要在RViz中查看机械臂模型，需要按以下步骤执行：
+
+1. 打开新的终端，进入工作空间：
+```bash
+cd ~/so_arm100_write/ros2_ws
+```
+
+2. 设置ROS2环境变量：
+```bash
+source /opt/ros/humble/setup.bash
+```
+
+3. 编译工作空间：
+```bash
+colcon build --symlink-install
+```
+
+4. 设置工作空间环境变量：
+```bash
+source install/setup.bash
+```
+
+5. 启动机械臂显示：
+```bash
+ros2 launch arm_description display.launch.py
+```
+
+#### 注意事项
+- 每次打开新终端都需要重新设置环境变量（步骤2和4）
+- 修改代码后需要重新编译（步骤3）
+- 如果出现错误，可以查看终端输出的错误信息
+
+### 2024-12-22 23:00
+#### 问题：编译错误
+运行时出现CMake错误，找不到catkin包。这是因为原始文件是为ROS1编写的，需要转换为ROS2格式。
+
+#### 解决方案
+1. 修改CMakeLists.txt：
+   - 更新CMake版本要求
+   - 将catkin替换为ament_cmake
+   - 更新安装路径
+
+2. 修改package.xml：
+   - 更新为format="3"
+   - 将buildtool_depend从catkin改为ament_cmake
+   - 更新依赖项为ROS2版本（如rviz2）
+   - 添加必要的exec_depend
+
+3. 主要改动：
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.8)
+project(arm_description)
+find_package(ament_cmake REQUIRED)
+install(
+  DIRECTORY config launch meshes urdf
+  DESTINATION share/${PROJECT_NAME}
+)
+ament_package()
+```
+
+```xml
+<!-- package.xml -->
+<package format="3">
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  ...
+</package>
+```
+
+#### 下一步计划
+1. 重新编译工作空间
+2. 启动RViz验证机械臂模型
+3. 继续开发轨迹规划功能
+
+### 2024-12-22 23:00
+#### ROS1到ROS2转换的记录
+1. ROS1到ROS2转换的必要性：
+   - ROS1和ROS2的包管理器不同
+   - ROS1使用catkin，ROS2使用ament_cmake
+   - ROS1和ROS2的依赖项不同
+
+2. 转换步骤：
+   - 修改CMakeLists.txt
+   - 修改package.xml
+   - 更新依赖项
+   - 重新编译工作空间
+
+3. 注意事项：
+   - 每次修改代码后需要重新编译
+   - 需要重新设置环境变量
+   - 需要重新启动RViz
+
+#### 下一步计划
+1. 继续开发轨迹规划功能
+2. 开发运动控制模块
+3. 实现完整的写字功能
+
+### 2024-12-22 23:02
+#### 问题：launch文件参数错误
+启动时出现错误："Unable to parse the value of parameter robot_description as yaml"。
+
+#### 问题分析
+在ROS2中，launch文件中的参数需要使用特定的类型包装器。我们需要使用`ParameterValue`来正确处理URDF文件的加载。
+
+#### 解决方案
+修改launch文件：
+1. 导入必要的模块：
+```python
+from launch_ros.parameter_descriptions import ParameterValue
+```
+
+2. 正确包装robot_description参数：
+```python
+robot_description = ParameterValue(
+    Command(['xacro ', urdf_file]),
+    value_type=str
+)
+```
+
+3. 添加节点输出设置：
+```python
+output='screen'
+```
+
+#### 下一步计划
+1. 重新启动仿真环境
+2. 验证机械臂模型显示
+3. 开始MoveIt2配置
+
+### 2024-12-22 23:05
+#### 问题：RViz坐标系错误
+启动后RViz提示"Frame [map] does not exist"错误，且无法显示机械臂模型。
+
+#### 问题分析
+1. RViz配置文件不正确，需要设置正确的固定坐标系（Fixed Frame）
+2. URDF文件的加载方式需要从xacro改为直接读取
+
+#### 解决方案
+1. 创建新的RViz配置文件：
+   - 设置Fixed Frame为"base_link"
+   - 添加RobotModel显示
+   - 配置正确的话题名称
+
+2. 修改launch文件：
+   ```python
+   # 使用cat而不是xacro加载URDF
+   robot_description = ParameterValue(
+       Command(['cat ', urdf_file]),
+       value_type=str
+   )
+   
+   # 更新RViz配置文件路径
+   rviz_config = os.path.join(pkg_share, 'config', 'display.rviz')
+   ```
+
+#### 下一步计划
+1. 验证机械臂模型显示
+2. 测试关节运动
+3. 开始MoveIt2配置
+
+### 2024-12-22 23:07
+#### 问题：URDF文件中的mesh路径错误
+RViz仍然显示"Errors loading geometries"错误。检查发现URDF文件中的mesh路径仍然使用旧的包名。
+
+#### 问题分析
+URDF文件中的mesh路径使用了 `package://so_arm100_write/meshes/`，但现在包名已经改为 `arm_description`。
+
+#### 解决方案
+修改URDF文件中所有mesh文件的路径，将：
+```xml
+filename="package://so_arm100_write/meshes/xxx.STL"
+```
+改为：
+```xml
+filename="package://arm_description/meshes/xxx.STL"
+```
+
+修改了以下链接的mesh路径：
+- base_link
+- shoulder_link
+- upper_arm_link
+- forearm_link
+- wrist_1_link
+- wrist_2_link
+- jaw_link
+- pen_point_link
+
+#### 下一步计划
+1. 重新编译工作空间
+2. 启动RViz验证机械臂模型
+3. 测试关节运动

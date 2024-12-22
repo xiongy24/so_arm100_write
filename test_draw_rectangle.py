@@ -84,10 +84,10 @@ def main():
         
         # 定义矩形参数（在机械臂基座前方的平面上）
         center_x = 0.0     # 基座中心线
-        center_y = 0.15    # 基座前方15cm
-        width = 0.06      # 矩形宽度6cm
-        height = 0.04    # 矩形高度4cm
-        z_height = 0.10  # 写字平面高度10cm
+        center_y = 0.10    # 基座前方10cm
+        width = 0.04      # 矩形宽度4cm
+        height = 0.03     # 矩形高度3cm
+        z_height = 0.05   # 写字平面高度5cm
         
         # 生成矩形轨迹点
         print("\n生成矩形轨迹...")

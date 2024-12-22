@@ -11,12 +11,12 @@ class MotionController:
         # DH参数（根据URDF文件中的信息）
         self.dh_params = [
             # [a, alpha, d, theta]
-            [0, np.pi/2, 0.0305, 0],  # Joint 1: shoulder_pan_joint
-            [-0.0158, 0, 0, 0],       # Joint 2: shoulder_lift_joint
-            [0.0317, 0, 0.10423, 0],  # Joint 3: elbow_joint
-            [0, 0, 0.09070, 0],       # Joint 4: wrist_pitch_joint
-            [-0.0161, 0, 0.0586, 0],  # Joint 5: wrist_roll_joint
-            [-0.0202, 0, 0.0259, 0],  # Joint 6: jaw_joint
+            [0, np.pi/2, 0.0305, 0],     # Joint 1: shoulder_pan_joint
+            [0, 0, 0, 0],                # Joint 2: shoulder_lift_joint
+            [0.0317, 0, 0.10423, 0],     # Joint 3: elbow_joint
+            [0, np.pi/2, 0.09070, 0],    # Joint 4: wrist_pitch_joint
+            [0, -np.pi/2, 0.0586, 0],    # Joint 5: wrist_roll_joint
+            [0, 0, 0.0259, 0],           # Joint 6: jaw_joint
         ]
         
         # 关节限制
@@ -26,14 +26,14 @@ class MotionController:
             [-1.57, 1.57],  # elbow_joint
             [-1.57, 1.57],  # wrist_pitch_joint
             [-1.57, 1.57],  # wrist_roll_joint
-            [-1.57, 1.57],  # jaw_joint
+            [-0.7, 0.7],    # jaw_joint
         ]
         
         # 当前关节角度
         self.current_joints = [0.0] * 6
         
         # 笔尖相对于末端执行器的偏移
-        self.pen_offset = np.array([0.0071456, -0.051425, 0.040525])
+        self.pen_offset = np.array([0.0, 0.0, 0.040525])  # 简化笔尖偏移，只保留Z轴偏移
 
     def transform_matrix(self, a: float, alpha: float, d: float, theta: float) -> np.ndarray:
         """计算DH参数对应的变换矩阵"""
@@ -72,7 +72,7 @@ class MotionController:
         
         max_iterations = 100
         epsilon = 1e-3
-        damping = 0.1  # 阻尼因子，用于避免奇异点
+        damping = 0.5  # 阻尼因子，用于避免奇异点
         
         # 设置目标姿态：保持笔尖垂直
         target_orientation = np.array([0, 0, -1])  # 笔尖朝下
@@ -115,7 +115,7 @@ class MotionController:
             delta_theta = J_T @ np.linalg.inv(J @ J_T + lambda_square * np.eye(6)) @ error
             
             # 更新关节角度，使用不同的权重
-            weights = [1.0, 1.0, 1.0, 0.8, 0.8, 0.5]  # 降低末端关节的权重
+            weights = [1.0, 1.0, 0.8, 0.6, 0.4, 0.2]  # 调整关节权重
             for i in range(6):
                 current_joints[i] += weights[i] * delta_theta[i]
                 # 限制关节角度在允许范围内

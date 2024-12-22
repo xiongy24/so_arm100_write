@@ -1,0 +1,16 @@
+[0.489s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build --no-deps symlink_data
+[0.659s] running develop
+[0.792s] running egg_info
+[0.792s] writing arm_planning.egg-info/PKG-INFO
+[0.792s] writing dependency_links to arm_planning.egg-info/dependency_links.txt
+[0.792s] writing entry points to arm_planning.egg-info/entry_points.txt
+[0.792s] writing requirements to arm_planning.egg-info/requires.txt
+[0.792s] writing top-level names to arm_planning.egg-info/top_level.txt
+[0.793s] reading manifest file 'arm_planning.egg-info/SOURCES.txt'
+[0.794s] writing manifest file 'arm_planning.egg-info/SOURCES.txt'
+[0.794s] running build_ext
+[0.795s] Creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages/arm-planning.egg-link (link to .)
+[0.795s] 
+[0.795s] Installed /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning
+[0.795s] running symlink_data
+[0.813s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning' returned '0': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build --no-deps symlink_data
