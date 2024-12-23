@@ -1013,23 +1013,23 @@ filename="package://arm_description/meshes/xxx.STL"
       ros2 launch arm_description display.launch.py
       ```
    
-   2. 在 RVIZ 中添加 Marker 显示：
-      - 点击 "Add" 按钮
-      - 选择 "By topic"
-      - 选择 "/visualization_marker"
-      - 点击 "OK" 确认
-   
-   3. 在第二个终端中运行可视化节点：
+   2. 运行可视化节点：
       ```bash
-      cd /home/ubuntu22/so_arm100_write/ros2_ws
-      source install/setup.bash
+      source /home/ubuntu22/so_arm100_write/ros2_ws/install/setup.bash
       ros2 run arm_visualization rectangle_visualizer
       ```
    
-   4. 按照程序提示操作：
-      - 确认完成 RVIZ 设置后按回车继续
-      - 在 RVIZ 中查看红色轨迹线
-      - 确认轨迹正确后按回车执行实际运动
+   3. 在 RVIZ 中添加两个 Marker 显示：
+      - 点击 "Add" 按钮
+      - 选择 "By topic"
+      - 等待并选择以下两个话题：
+        * `/visualization_marker`：显示预期轨迹（红色）和预览轨迹（蓝色）
+        * `/current_path_marker`：显示实际执行的轨迹（绿色）
+
+4. 按照程序提示操作：
+   - 确认完成 RVIZ 设置后按回车继续
+   - 在 RVIZ 中查看红色轨迹线
+   - 确认轨迹正确后按回车执行实际运动
 
 ### 2024-12-22 23:57
 #### 改进消息发布机制
@@ -1046,10 +1046,9 @@ filename="package://arm_description/meshes/xxx.STL"
       ros2 launch arm_description display.launch.py
       ```
    
-   2. 在第二个终端中运行可视化节点：
+   2. 运行可视化节点：
       ```bash
-      cd /home/ubuntu22/so_arm100_write/ros2_ws
-      source install/setup.bash
+      source /home/ubuntu22/so_arm100_write/ros2_ws/install/setup.bash
       ros2 run arm_visualization rectangle_visualizer
       ```
    
@@ -1064,7 +1063,7 @@ filename="package://arm_description/meshes/xxx.STL"
       - 确认看到红色轨迹后按回车执行运动
 
 ### 2024-12-23 00:24
-#### 改进机械臂初始化和运动控制
+#### 改进机械臂轨迹规划和执行
 
 ### 修改内容
 
@@ -1117,3 +1116,49 @@ filename="package://arm_description/meshes/xxx.STL"
 - 机械臂的初始化序列现在遵循标准流程：电机零位 -> URDF初始位置
 - 所有关键动作都添加了适当的等待时间，确保运动稳定
 - 改进了错误处理，便于调试和问题定位
+
+### 2023-12-23 更新
+
+### 改进机械臂轨迹规划和执行
+
+#### 1. 使用 IKPy 进行逆运动学求解
+- 从 URDF 文件直接读取机械臂参数，避免手动设置 DH 参数可能出现的错误
+- 使用经过验证的逆运动学求解器，提高解算的准确性
+- 添加完整的姿态约束支持，更好地控制笔尖朝向
+
+#### 2. 添加轨迹预览功能
+- 在实际执行动作前，先在 RVIZ 中显示预览轨迹（蓝色线条）
+- 用户确认轨迹无误后，才开始执行实际运动
+- 执行过程中实时显示当前路径（绿色线条）
+
+#### 3. 改进轨迹规划和执行流程
+- 使用插值生成更平滑的运动轨迹
+- 添加详细的调试信息，方便问题定位
+- 优化错误处理和日志输出
+
+#### 4. 使用说明
+1. 在第一个终端中启动 RVIZ：
+   ```bash
+   ros2 launch arm_description display.launch.py
+   ```
+
+2. 在第二个终端中运行可视化节点：
+   ```bash
+   cd /home/ubuntu22/so_arm100_write/ros2_ws
+   source install/setup.bash
+   ros2 run arm_visualization rectangle_visualizer
+   ```
+
+3. 在 RVIZ 中添加两个 Marker 显示：
+   - 点击 "Add" 按钮
+   - 选择 "By topic"
+   - 等待并选择以下两个话题：
+     * `/visualization_marker`：显示预期轨迹（红色）和预览轨迹（蓝色）
+     * `/current_path_marker`：显示实际执行的轨迹（绿色）
+
+4. 观察 RVIZ 中显示的预览轨迹，确认无误后按回车键开始执行实际运动
+
+#### 5. 下一步计划
+1. 优化轨迹规划参数，使运动更加平滑
+2. 添加更多的安全检查，如工作空间边界检查
+3. 实现更复杂的图形绘制功能

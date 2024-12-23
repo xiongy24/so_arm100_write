@@ -5,19 +5,59 @@ import numpy as np
 from typing import List, Tuple, Optional
 from .trajectory_generator import StrokePoint
 import math
+import ikpy.chain
+import ikpy.utils.plot as plot_utils
+import os
+from ament_index_python.packages import get_package_share_directory
+import xml.etree.ElementTree as ET
 
 class MotionController:
     def __init__(self):
-        # DH参数（根据URDF文件中的信息）
-        self.dh_params = [
-            # [a, alpha, d, theta]
-            [0, np.pi/2, 0.0305, 0],     # Joint 1: shoulder_pan_joint
-            [0, 0, 0, 0],                # Joint 2: shoulder_lift_joint
-            [0.0317, 0, 0.10423, 0],     # Joint 3: elbow_joint
-            [0, np.pi/2, 0.09070, 0],    # Joint 4: wrist_pitch_joint
-            [0, -np.pi/2, 0.0586, 0],    # Joint 5: wrist_roll_joint
-            [0, 0, 0.0259, 0],           # Joint 6: jaw_joint
-        ]
+        # 获取 URDF 文件路径
+        arm_description_dir = get_package_share_directory('arm_description')
+        urdf_file = os.path.join(arm_description_dir, 'urdf', 'so_arm100_write.urdf')
+        
+        # 如果找不到安装目录中的文件，尝试源代码目录
+        if not os.path.exists(urdf_file):
+            src_urdf_file = "/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_description/urdf/so_arm100_write.urdf"
+            if os.path.exists(src_urdf_file):
+                urdf_file = src_urdf_file
+            else:
+                raise FileNotFoundError(f"找不到 URDF 文件，已尝试以下路径：\n1. {urdf_file}\n2. {src_urdf_file}")
+        
+        print(f"使用 URDF 文件：{urdf_file}")
+        
+        # 解析 URDF 文件以获取关节信息
+        tree = ET.parse(urdf_file)
+        root = tree.getroot()
+        
+        # 计算活动关节掩码（注意：IKPy 会自动添加一个原点链接）
+        active_links_mask = [False]  # 原点链接设为非活动的
+        joint_count = 0
+        
+        for joint in root.findall(".//joint"):
+            joint_type = joint.get("type")
+            joint_name = joint.get("name")
+            print(f"找到关节: {joint_name} (类型: {joint_type})")
+            
+            # 只有非固定关节才计入
+            if joint_type != "fixed":
+                joint_count += 1
+                active_links_mask.append(True)  # 将所有非固定关节设为活动的
+            else:
+                active_links_mask.append(False)  # 固定关节设为非活动的
+        
+        print(f"总链接数: {len(active_links_mask)} (包括原点链接)")
+        print(f"活动关节数: {joint_count}")
+        print(f"活动关节掩码: {active_links_mask}")
+        
+        # 创建机械臂运动链
+        self.chain = ikpy.chain.Chain.from_urdf_file(
+            urdf_file,
+            base_elements=["base_link"],
+            active_links_mask=active_links_mask,
+            name="arm"
+        )
         
         # 关节限制
         self.joint_limits = [
@@ -35,129 +75,104 @@ class MotionController:
         # 笔尖相对于末端执行器的偏移
         self.pen_offset = np.array([0.0, 0.0, 0.040525])  # 简化笔尖偏移，只保留Z轴偏移
 
-    def transform_matrix(self, a: float, alpha: float, d: float, theta: float) -> np.ndarray:
-        """计算DH参数对应的变换矩阵"""
-        ct = np.cos(theta)
-        st = np.sin(theta)
-        ca = np.cos(alpha)
-        sa = np.sin(alpha)
-        
-        return np.array([
-            [ct, -st*ca, st*sa, a*ct],
-            [st, ct*ca, -ct*sa, a*st],
-            [0, sa, ca, d],
-            [0, 0, 0, 1]
-        ])
-
     def forward_kinematics(self, joint_angles: List[float]) -> np.ndarray:
         """正向运动学：计算给定关节角度下的末端执行器位姿"""
-        T = np.eye(4)
-        
-        for i, theta in enumerate(joint_angles):
-            a, alpha, d, _ = self.dh_params[i]
-            T = T @ self.transform_matrix(a, alpha, d, theta)
+        # 使用 IKPy 的正向运动学
+        fk_matrix = self.chain.forward_kinematics(joint_angles)
         
         # 添加笔尖偏移
-        T[0:3, 3] += T[0:3, 0:3] @ self.pen_offset
+        fk_matrix[0:3, 3] += fk_matrix[0:3, 0:3] @ self.pen_offset
         
-        return T
+        return fk_matrix
 
-    def inverse_kinematics(self, target_pos: np.ndarray, current_joints: List[float] = None) -> List[float]:
-        """逆运动学：计算达到目标位置所需的关节角度
-        
-        使用数值迭代法（雅可比矩阵）求解逆运动学，并添加关节优先级和姿态约束
-        """
-        if current_joints is None:
-            current_joints = self.current_joints.copy()
-        
-        max_iterations = 100
-        epsilon = 1e-3
-        damping = 0.5  # 阻尼因子，用于避免奇异点
-        
-        # 设置目标姿态：保持笔尖垂直
-        target_orientation = np.array([0, 0, -1])  # 笔尖朝下
-        
-        for _ in range(max_iterations):
-            # 计算当前位置和姿态
-            current_transform = self.forward_kinematics(current_joints)
-            current_pos = current_transform[0:3, 3]
-            current_orientation = current_transform[0:3, 2]  # z轴方向
-            
-            # 计算位置和姿态误差
-            pos_error = target_pos - current_pos
-            orientation_error = np.cross(current_orientation, target_orientation)
-            
-            # 组合误差向量
-            error = np.concatenate([pos_error, 0.5 * orientation_error])
-            
-            if np.linalg.norm(error) < epsilon:
-                break
-            
-            # 计算雅可比矩阵
-            J = np.zeros((6, 6))
-            delta = 1e-6
-            
-            for i in range(6):
-                joints_plus = current_joints.copy()
-                joints_plus[i] += delta
-                transform_plus = self.forward_kinematics(joints_plus)
-                pos_plus = transform_plus[0:3, 3]
-                orientation_plus = transform_plus[0:3, 2]
-                
-                # 位置雅可比矩阵
-                J[0:3, i] = (pos_plus - current_pos) / delta
-                # 姿态雅可比矩阵
-                J[3:6, i] = np.cross(current_orientation, orientation_plus - current_orientation) / delta
-            
-            # 使用阻尼最小二乘法求解
-            J_T = J.T
-            lambda_square = damping * damping
-            delta_theta = J_T @ np.linalg.inv(J @ J_T + lambda_square * np.eye(6)) @ error
-            
-            # 更新关节角度，使用不同的权重
-            weights = [1.0, 1.0, 0.8, 0.6, 0.4, 0.2]  # 调整关节权重
-            for i in range(6):
-                current_joints[i] += weights[i] * delta_theta[i]
-                # 限制关节角度在允许范围内
-                current_joints[i] = np.clip(current_joints[i],
-                                          self.joint_limits[i][0],
-                                          self.joint_limits[i][1])
-        
-        return current_joints
-
-    def calculate_ik(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float) -> Optional[List[float]]:
+    def calculate_ik(self, x: float, y: float, z: float, roll: float = 0.0, pitch: float = -np.pi/2, yaw: float = 0.0) -> Optional[List[float]]:
         """计算逆运动学解
 
         Args:
             x: 目标位置x坐标（米）
             y: 目标位置y坐标（米）
             z: 目标位置z坐标（米）
-            roll: 目标姿态roll角（弧度）
-            pitch: 目标姿态pitch角（弧度）
-            yaw: 目标姿态yaw角（弧度）
+            roll: 目标姿态roll角（弧度），默认0
+            pitch: 目标姿态pitch角（弧度），默认-pi/2（笔尖朝下）
+            yaw: 目标姿态yaw角（弧度），默认0
 
         Returns:
             List[float]: 关节角度列表，如果无解则返回None
         """
         try:
-            # 创建目标位置向量
-            target_pos = np.array([x, y, z])
+            print(f"\n=== 计算逆运动学 ===")
+            print(f"目标位置: x={x:.3f}, y={y:.3f}, z={z:.3f}")
+            print(f"目标姿态: roll={roll:.1f}, pitch={pitch:.1f}, yaw={yaw:.1f}")
             
-            # 计算逆运动学解
-            joint_angles = self.inverse_kinematics(target_pos)
+            # 考虑笔尖偏移，调整目标位置
+            target_pos = np.array([x, y, z]) - np.array([0, 0, self.pen_offset[2]])
+            print(f"考虑笔尖偏移后的目标位置: {target_pos}")
+            
+            # 设置目标姿态矩阵
+            target_orientation = np.array([
+                [1, 0, 0],
+                [0, np.cos(roll), -np.sin(roll)],
+                [0, np.sin(roll), np.cos(roll)]
+            ]) @ np.array([
+                [np.cos(pitch), 0, np.sin(pitch)],
+                [0, 1, 0],
+                [-np.sin(pitch), 0, np.cos(pitch)]
+            ]) @ np.array([
+                [np.cos(yaw), -np.sin(yaw), 0],
+                [np.sin(yaw), np.cos(yaw), 0],
+                [0, 0, 1]
+            ])
+            
+            # 构建目标变换矩阵
+            target_matrix = np.eye(4)
+            target_matrix[0:3, 0:3] = target_orientation
+            target_matrix[0:3, 3] = target_pos
+            
+            # 使用当前关节角度作为初始猜测
+            initial_position = self.current_joints if any(self.current_joints) else None
+            
+            # 计算逆运动学
+            joint_angles = self.chain.inverse_kinematics(
+                target_matrix,
+                initial_position=initial_position,
+                orientation_mode="all",  # 考虑完整的姿态约束
+                max_iter=100
+            )
+            
             if joint_angles is None:
+                print("无法找到逆运动学解")
                 return None
             
-            # 检查解是否在关节限制范围内
-            for i, (angle, (min_angle, max_angle)) in enumerate(zip(joint_angles, self.joint_limits)):
-                if angle < min_angle or angle > max_angle:
-                    print(f"Joint {i} angle {angle:.2f} exceeds limits [{min_angle:.2f}, {max_angle:.2f}]")
-                    return None
+            print("\n计算得到的关节角度（弧度）:")
+            for i, angle in enumerate(joint_angles[1:]):  # 跳过第一个元素（base）
+                print(f"Joint {i}: {angle:.3f} rad ({math.degrees(angle):.1f} deg)")
             
-            return joint_angles
+            # 检查关节限制
+            for i, (angle, (min_angle, max_angle)) in enumerate(zip(joint_angles[1:], self.joint_limits)):
+                if angle < min_angle or angle > max_angle:
+                    print(f"警告: Joint {i} 角度 {angle:.2f} rad ({math.degrees(angle):.1f} deg) 超出限制范围 [{min_angle:.2f}, {max_angle:.2f}]")
+                    return None
+                print(f"Joint {i} 在限制范围内: {min_angle:.2f} <= {angle:.2f} <= {max_angle:.2f}")
+            
+            # 验证解的准确性
+            fk_matrix = self.chain.forward_kinematics(joint_angles)
+            actual_pos = fk_matrix[0:3, 3]
+            pos_error = np.linalg.norm(actual_pos - target_pos)
+            print(f"\n位置误差: {pos_error*1000:.2f} mm")
+            
+            if pos_error > 0.001:  # 误差大于1mm
+                print("警告: 位置误差过大")
+                print(f"目标位置: {target_pos}")
+                print(f"实际位置: {actual_pos}")
+            
+            # 更新当前关节角度
+            self.current_joints = list(joint_angles[1:])  # 跳过第一个元素（base）
+            return self.current_joints
             
         except Exception as e:
-            print(f"Error calculating inverse kinematics: {e}")
+            print(f"计算逆运动学时出错: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def plan_trajectory(self, stroke_points: List[StrokePoint]) -> List[Tuple[List[float], float]]:
@@ -173,11 +188,16 @@ class MotionController:
         current_time = 0.0
         
         for i, point in enumerate(stroke_points):
-            # 计算目标位置
-            target_pos = np.array([point.x, point.y, point.z]) / 1000.0  # 转换为米
+            # 计算目标位置（单位转换：毫米->米）
+            x = point.x / 1000.0
+            y = point.y / 1000.0
+            z = point.z / 1000.0
             
             # 计算关节角度
-            joint_angles = self.inverse_kinematics(target_pos)
+            joint_angles = self.calculate_ik(x, y, z)
+            if joint_angles is None:
+                print(f"警告: 无法为轨迹点 {i} 找到逆运动学解")
+                continue
             
             # 计算时间点
             if i > 0:
@@ -186,8 +206,8 @@ class MotionController:
                 distance = np.sqrt((point.x - prev_point.x)**2 +
                                  (point.y - prev_point.y)**2 +
                                  (point.z - prev_point.z)**2)
-                # 根据速度计算时间增量
-                time_increment = distance / point.speed
+                # 根据速度计算时间增量（考虑单位转换）
+                time_increment = (distance / 1000.0) / point.speed  # 距离转换为米
                 current_time += time_increment
             
             trajectory.append((joint_angles, current_time))
@@ -207,20 +227,22 @@ class MotionController:
         if not trajectory:
             return []
         
-        # 提取时间点和关节角度
-        times = [t for _, t in trajectory]
-        joint_angles = [angles for angles, _ in trajectory]
-        
-        # 创建插值时间点
-        t_interp = np.arange(times[0], times[-1], dt)
-        
-        # 对每个关节进行插值
         interpolated = []
-        for i in range(6):  # 6个关节
-            joint_i = [angles[i] for angles in joint_angles]
-            # 使用三次样条插值
-            interpolated_i = np.interp(t_interp, times, joint_i)
-            interpolated.append(interpolated_i)
+        for i in range(len(trajectory) - 1):
+            current_joints, t1 = trajectory[i]
+            next_joints, t2 = trajectory[i + 1]
+            
+            # 计算这段轨迹需要的步数
+            steps = int((t2 - t1) / dt)
+            
+            for step in range(steps):
+                # 线性插值
+                t = step / steps
+                joints = [current_joints[j] + t * (next_joints[j] - current_joints[j])
+                         for j in range(len(current_joints))]
+                interpolated.append(joints)
         
-        # 重新组织数据格式
-        return [[joint[i] for joint in interpolated] for i in range(len(t_interp))]
+        # 添加最后一个点
+        interpolated.append(trajectory[-1][0])
+        
+        return interpolated

@@ -1,0 +1,24 @@
+[0.441s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_visualization': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/arm_visualization build --build-base /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build install --record /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/install.log --single-version-externally-managed install_data
+[0.603s] running egg_info
+[0.603s] writing ../../build/arm_visualization/arm_visualization.egg-info/PKG-INFO
+[0.604s] writing dependency_links to ../../build/arm_visualization/arm_visualization.egg-info/dependency_links.txt
+[0.604s] writing entry points to ../../build/arm_visualization/arm_visualization.egg-info/entry_points.txt
+[0.604s] writing requirements to ../../build/arm_visualization/arm_visualization.egg-info/requires.txt
+[0.604s] writing top-level names to ../../build/arm_visualization/arm_visualization.egg-info/top_level.txt
+[0.605s] reading manifest file '../../build/arm_visualization/arm_visualization.egg-info/SOURCES.txt'
+[0.605s] writing manifest file '../../build/arm_visualization/arm_visualization.egg-info/SOURCES.txt'
+[0.605s] running build
+[0.605s] running build_py
+[0.606s] copying arm_visualization/arm_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+[0.606s] running install
+[0.606s] running install_lib
+[0.606s] copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/arm_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+[0.607s] byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/arm_controller.py to arm_controller.cpython-310.pyc
+[0.608s] running install_data
+[0.609s] running install_egg_info
+[0.610s] removing '/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization-0.0.0-py3.10.egg-info' (and everything under it)
+[0.610s] Copying ../../build/arm_visualization/arm_visualization.egg-info to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization-0.0.0-py3.10.egg-info
+[0.610s] running install_scripts
+[0.622s] Installing rectangle_visualizer script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+[0.622s] writing list of installed files to '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/install.log'
+[0.640s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_visualization' returned '0': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/arm_visualization build --build-base /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build install --record /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/install.log --single-version-externally-managed install_data

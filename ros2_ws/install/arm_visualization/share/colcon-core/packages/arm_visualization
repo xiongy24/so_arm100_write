@@ -1,1 +1,1 @@
-arm_controller:geometry_msgs:rclpy:visualization_msgs
+ament_index_python:arm_controller:geometry_msgs:rclpy:visualization_msgs
