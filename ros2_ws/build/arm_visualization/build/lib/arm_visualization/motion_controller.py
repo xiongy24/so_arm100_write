@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from .trajectory_generator import StrokePoint
 import math
 
@@ -124,6 +124,41 @@ class MotionController:
                                           self.joint_limits[i][1])
         
         return current_joints
+
+    def calculate_ik(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float) -> Optional[List[float]]:
+        """计算逆运动学解
+
+        Args:
+            x: 目标位置x坐标（米）
+            y: 目标位置y坐标（米）
+            z: 目标位置z坐标（米）
+            roll: 目标姿态roll角（弧度）
+            pitch: 目标姿态pitch角（弧度）
+            yaw: 目标姿态yaw角（弧度）
+
+        Returns:
+            List[float]: 关节角度列表，如果无解则返回None
+        """
+        try:
+            # 创建目标位置向量
+            target_pos = np.array([x, y, z])
+            
+            # 计算逆运动学解
+            joint_angles = self.inverse_kinematics(target_pos)
+            if joint_angles is None:
+                return None
+            
+            # 检查解是否在关节限制范围内
+            for i, (angle, (min_angle, max_angle)) in enumerate(zip(joint_angles, self.joint_limits)):
+                if angle < min_angle or angle > max_angle:
+                    print(f"Joint {i} angle {angle:.2f} exceeds limits [{min_angle:.2f}, {max_angle:.2f}]")
+                    return None
+            
+            return joint_angles
+            
+        except Exception as e:
+            print(f"Error calculating inverse kinematics: {e}")
+            return None
 
     def plan_trajectory(self, stroke_points: List[StrokePoint]) -> List[Tuple[List[float], float]]:
         """规划轨迹，返回关节角度序列和对应的时间点

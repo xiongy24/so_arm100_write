@@ -13,22 +13,28 @@ class RectangleVisualizer(Node):
     def __init__(self):
         super().__init__('rectangle_visualization')
         self.marker_pub = self.create_publisher(Marker, '/visualization_marker', 10)
+        self.current_marker_pub = self.create_publisher(Marker, '/current_path_marker', 10)
         self.arm = ArmController()
         
-    def visualize_rectangle(self, points, z_height):
+    def visualize_rectangle(self, points, z_height, is_current_path=False):
         marker = Marker()
         marker.header.frame_id = "base_link"
         marker.header.stamp = self.get_clock().now().to_msg()
-        marker.ns = "rectangle_path"
-        marker.id = 0
+        marker.ns = "current_path" if is_current_path else "rectangle_path"
+        marker.id = 1 if is_current_path else 0
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.ADD
         
         # 设置标记的尺寸和颜色
         marker.scale.x = 0.002  # 线宽2mm
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 0.0
+        if is_current_path:
+            marker.color.r = 0.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
+        else:
+            marker.color.r = 1.0
+            marker.color.g = 0.0
+            marker.color.b = 0.0
         marker.color.a = 1.0
         
         # 添加路径点
@@ -48,7 +54,16 @@ class RectangleVisualizer(Node):
             point.z = z_height
             marker.points.append(point)
             
-        self.marker_pub.publish(marker)
+        # 发布到相应的话题
+        if is_current_path:
+            self.current_marker_pub.publish(marker)
+        else:
+            self.marker_pub.publish(marker)
+
+    def visualize_current_path(self, current_points, z_height):
+        """显示当前已经画过的路径"""
+        if len(current_points) > 0:
+            self.visualize_rectangle(current_points, z_height, True)
 
     def wait_for_position(self, target_angles, timeout=5.0, threshold=0.1):
         """等待机械臂到达目标位置"""
@@ -76,49 +91,77 @@ class RectangleVisualizer(Node):
                 return False
                 
             print("\n开始执行运动...")
+            current_path = []  # 存储已经执行过的点
             
-            # 移动到初始位置（抬笔高度）
-            print("1. 移动到初始位置...")
-            initial_joint_angles = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-            self.arm.move_to_joint_angles(initial_joint_angles)
-            if not self.wait_for_position(initial_joint_angles):
-                print("移动到初始位置失败")
+            # 1. 移动到电机零位
+            print("1. 移动到电机零位...")
+            if not self.arm.move_to_zero():
+                print("移动到电机零位失败")
                 return False
+            time.sleep(2.0)  # 等待稳定
+            
+            # 2. 移动到URDF初始位置
+            print("2. 移动到URDF初始位置...")
+            if not self.arm.move_to_urdf_init():
+                print("移动到URDF初始位置失败")
+                return False
+            time.sleep(2.0)  # 等待稳定
             
             # 移动到起点上方
-            print("2. 移动到起点上方...")
+            print("3. 移动到起点上方...")
             start_point = points[0]
-            self.arm.move_to_pose(start_point[0], start_point[1], pen_up_height, 0, 180, 0)
+            success = self.arm.move_to_pose(start_point[0], start_point[1], pen_up_height, 0, 180, 0)
+            if not success:
+                print("移动到起点上方失败")
+                return False
             time.sleep(2.0)
             
             # 落笔
-            print("3. 落笔...")
-            self.arm.move_to_pose(start_point[0], start_point[1], z_height, 0, 180, 0)
+            print("4. 落笔...")
+            success = self.arm.move_to_pose(start_point[0], start_point[1], z_height, 0, 180, 0)
+            if not success:
+                print("落笔失败")
+                return False
             time.sleep(1.0)
+            current_path.append(start_point)
+            self.visualize_current_path(current_path, z_height)
             
             # 执行轨迹
-            print("4. 执行轨迹...")
-            for i, (x, y) in enumerate(points):
+            print("5. 执行轨迹...")
+            for i, (x, y) in enumerate(points[1:], 1):  # 从第二个点开始
                 print(f"   执行第 {i+1}/{len(points)} 个点")
-                self.arm.move_to_pose(x, y, z_height, 0, 180, 0)
+                success = self.arm.move_to_pose(x, y, z_height, 0, 180, 0)
+                if not success:
+                    print(f"移动到点 ({x}, {y}) 失败")
+                    return False
                 time.sleep(0.5)
+                current_path.append((x, y))
+                self.visualize_current_path(current_path, z_height)
+                # 确保ROS消息被处理
+                rclpy.spin_once(self, timeout_sec=0)
             
             # 回到起点（闭合矩形）
-            print("5. 闭合轨迹...")
-            self.arm.move_to_pose(points[0][0], points[0][1], z_height, 0, 180, 0)
+            print("6. 闭合轨迹...")
+            success = self.arm.move_to_pose(points[0][0], points[0][1], z_height, 0, 180, 0)
+            if not success:
+                print("闭合轨迹失败")
+                return False
             time.sleep(1.0)
             
             # 抬笔
-            print("6. 抬笔...")
-            self.arm.move_to_pose(points[0][0], points[0][1], pen_up_height, 0, 180, 0)
+            print("7. 抬笔...")
+            success = self.arm.move_to_pose(points[0][0], points[0][1], pen_up_height, 0, 180, 0)
+            if not success:
+                print("抬笔失败")
+                return False
             time.sleep(1.0)
             
-            # 回到初始位置
-            print("7. 返回初始位置...")
-            self.arm.move_to_joint_angles(initial_joint_angles)
-            if not self.wait_for_position(initial_joint_angles):
-                print("返回初始位置失败")
+            # 回到URDF初始位置
+            print("8. 返回URDF初始位置...")
+            if not self.arm.move_to_urdf_init():
+                print("返回URDF初始位置失败")
                 return False
+            time.sleep(2.0)  # 等待稳定
             
             print("运动执行完成！")
             return True
@@ -160,19 +203,19 @@ def main():
     print("\n=== 矩形轨迹可视化程序 ===")
     print("请确保已经完成以下步骤：")
     print("1. 在另一个终端运行：ros2 launch arm_description display.launch.py")
-    print("2. 在RVIZ中添加Marker显示：")
+    print("2. 在RVIZ中添加两个Marker显示：")
     print("   - 点击 'Add' 按钮")
     print("   - 选择 'By topic'")
-    print("   - 等待 '/visualization_marker' 出现（大约需要3-5秒）")
-    print("   - 选择 '/visualization_marker'")
+    print("   - 等待 '/visualization_marker' 和 '/current_path_marker' 出现（大约需要3-5秒）")
+    print("   - 分别选择这两个话题")
     print("   - 点击 'OK' 确认\n")
     
     rclpy.init()
     visualizer = RectangleVisualizer()
     
     # 设置矩形参数（根据机器人工作区域调整）
-    center_x = 0.25  # 矩形中心x坐标，距离基座25cm
-    center_y = 0.0   # 矩形中心y坐标，在基座正前方
+    center_x = 0.0    # 矩形中心x坐标，在基座中心线上
+    center_y = -0.25  # 矩形中心y坐标，距离基座前方25cm
     width = 0.1      # 矩形宽度10cm
     height = 0.1     # 矩形高度10cm
     z_height = 0.03  # 写字高度3cm

@@ -66,7 +66,7 @@ class ArmController:
             
             # 设置P系数（控制精度和响应速度）
             print("Setting P coefficient...")
-            self.bus.write("P_Coefficient", [8] * len(self.motors))  # 使用较小的P系数使运动更平滑
+            self.bus.write("P_Coefficient", [32] * len(self.motors))
             time.sleep(0.5)
             
             return True
@@ -90,6 +90,82 @@ class ArmController:
             except Exception as e:
                 print(f"Disconnection error: {e}")
 
+    def get_current_joints(self) -> Optional[List[float]]:
+        """获取当前关节角度（弧度）"""
+        try:
+            if not self.bus:
+                return None
+            
+            # 读取当前位置
+            positions = []
+            for joint_name in self.motors.keys():
+                pos = self.bus.read("Present_Position", joint_name)
+                if pos is None:
+                    return None
+                positions.append(pos)
+            
+            # 转换为弧度
+            current_angles = [self.steps_to_rad(pos) for pos in positions]
+            return current_angles
+            
+        except Exception as e:
+            print(f"Error getting current joints: {e}")
+            return None
+
+    def move_to_joint_angles(self, target_angles: List[float]) -> bool:
+        """移动到指定的关节角度（弧度）"""
+        try:
+            if not self.bus:
+                return False
+                
+            # 检查输入参数
+            if len(target_angles) != len(self.motors):
+                print(f"Expected {len(self.motors)} angles, got {len(target_angles)}")
+                return False
+            
+            # 将目标角度转换为电机步数
+            target_positions = [self.rad_to_steps(angle) for angle in target_angles]
+            
+            # 获取当前位置
+            current_positions = []
+            for joint_name in self.motors.keys():
+                pos = self.bus.read("Present_Position", joint_name)
+                if pos is None:
+                    return False
+                current_positions.append(pos)
+            
+            # 生成平滑路径
+            path_points = self.interpolate_path(current_positions, target_positions)
+            
+            # 执行运动
+            joint_names = list(self.motors.keys())
+            for positions in path_points:
+                for i, joint_name in enumerate(joint_names):
+                    self.bus.write("Goal_Position", positions[i], joint_name)
+                time.sleep(0.02)  # 50Hz控制频率
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error moving to joint angles: {e}")
+            return False
+
+    def move_to_pose(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float) -> bool:
+        """移动末端执行器到指定位姿"""
+        try:
+            # 使用运动控制器计算逆运动学
+            target_angles = self.motion_controller.calculate_ik(x, y, z, roll, pitch, yaw)
+            if target_angles is None:
+                print("无法计算逆运动学解")
+                return False
+            
+            # 移动到目标关节角度
+            return self.move_to_joint_angles(target_angles)
+            
+        except Exception as e:
+            print(f"Error moving to pose: {e}")
+            return False
+
     def interpolate_path(self, start_positions, end_positions, steps=50):
         """在起始位置和目标位置之间进行线性插值，生成平滑路径"""
         paths = []
@@ -102,8 +178,8 @@ class ArmController:
             paths.append(current_pos)
         return paths
 
-    def move_to_zero(self):
-        """将机械臂移动到零位"""
+    def move_to_zero(self) -> bool:
+        """将机械臂移动到电机零位（所有关节角度为0）"""
         if not self.bus:
             print("Not connected to the arm")
             return False
@@ -111,24 +187,34 @@ class ArmController:
         try:
             print("Moving to motor zero position...")
             # 获取当前位置
-            current_positions = self.bus.read("Present_Position")
+            current_positions = []
+            for joint_name in self.motors.keys():
+                pos = self.bus.read("Present_Position", joint_name)
+                if pos is None:
+                    return False
+                current_positions.append(pos)
+            
+            # 目标位置：所有电机的零位是2048
             target_positions = [2048] * len(self.motors)
             
             # 生成平滑路径
             path = self.interpolate_path(current_positions, target_positions)
             
             # 执行平滑运动
+            joint_names = list(self.motors.keys())
             for positions in path:
-                self.bus.write("Goal_Position", positions)
+                for i, joint_name in enumerate(joint_names):
+                    self.bus.write("Goal_Position", positions[i], joint_name)
                 time.sleep(0.02)  # 50Hz的更新频率
             
             time.sleep(0.5)  # 最后等待稳定
             return True
+            
         except Exception as e:
             print(f"Move to zero error: {e}")
             return False
 
-    def move_to_urdf_init(self):
+    def move_to_urdf_init(self) -> bool:
         """移动到URDF文件中定义的初始位置"""
         if not self.bus:
             print("Not connected to the arm")
@@ -147,7 +233,12 @@ class ArmController:
             }
             
             # 获取当前位置
-            current_positions = self.bus.read("Present_Position")
+            current_positions = []
+            for joint_name in self.motors.keys():
+                pos = self.bus.read("Present_Position", joint_name)
+                if pos is None:
+                    return False
+                current_positions.append(pos)
             
             # 计算目标位置
             target_positions = []
@@ -160,8 +251,10 @@ class ArmController:
             path = self.interpolate_path(current_positions, target_positions)
             
             # 执行平滑运动
+            joint_names = list(self.motors.keys())
             for positions in path:
-                self.bus.write("Goal_Position", positions)
+                for i, joint_name in enumerate(joint_names):
+                    self.bus.write("Goal_Position", positions[i], joint_name)
                 time.sleep(0.02)  # 50Hz的更新频率
             
             time.sleep(0.5)  # 最后等待稳定
@@ -169,87 +262,4 @@ class ArmController:
             
         except Exception as e:
             print(f"Move to URDF init error: {e}")
-            return False
-
-    def move_joints(self, joint_angles):
-        """移动机械臂到指定的关节角度"""
-        if not self.bus:
-            print("Not connected to the arm")
-            return False
-        
-        try:
-            # 获取当前位置
-            current_positions = self.bus.read("Present_Position")
-            
-            # 计算目标位置
-            target_positions = []
-            for joint_name, angle in joint_angles.items():
-                steps = self.rad_to_steps(angle)
-                target_positions.append(steps)
-            
-            # 生成平滑路径
-            path = self.interpolate_path(current_positions, target_positions)
-            
-            # 执行平滑运动
-            for positions in path:
-                self.bus.write("Goal_Position", positions)
-                time.sleep(0.02)  # 50Hz的更新频率
-            
-            time.sleep(0.5)  # 最后等待稳定
-            return True
-        except Exception as e:
-            print(f"Move joints error: {e}")
-            return False
-
-    def get_current_joints(self) -> Optional[List[float]]:
-        """获取当前关节角度（弧度）"""
-        if not self.bus:
-            print("Not connected to the arm")
-            return None
-        
-        try:
-            positions = self.bus.read("Present_Position")
-            return [self.steps_to_rad(pos) for pos in positions]
-        except Exception as e:
-            print(f"Get current joints error: {e}")
-            return None
-
-    def execute_trajectory(self, trajectory: List[List[float]], dt: float = 0.01) -> bool:
-        """执行轨迹
-        
-        Args:
-            trajectory: 关节角度序列
-            dt: 时间步长
-        """
-        if not self.bus:
-            print("Not connected to the arm")
-            return False
-        
-        try:
-            for joint_angles in trajectory:
-                if not self.move_joints({joint_name: angle for joint_name, angle in zip(self.motors.keys(), joint_angles)}):
-                    return False
-                time.sleep(dt)
-            return True
-        except Exception as e:
-            print(f"Execute trajectory error: {e}")
-            return False
-
-    def write_stroke(self, stroke_points: List[StrokePoint]) -> bool:
-        """执行单个笔画
-        
-        Args:
-            stroke_points: 笔画轨迹点列表
-        """
-        try:
-            # 规划轨迹
-            trajectory = self.motion_controller.plan_trajectory(stroke_points)
-            
-            # 插值得到更密集的轨迹点
-            dense_trajectory = self.motion_controller.interpolate_trajectory(trajectory)
-            
-            # 执行轨迹
-            return self.execute_trajectory(dense_trajectory)
-        except Exception as e:
-            print(f"Write stroke error: {e}")
             return False
