@@ -57,8 +57,9 @@ class RectangleVisualizer(Node):
         """在 RVIZ 中预览轨迹"""
         print("\n开始轨迹预览...")
         for point in points:
-            # 添加姿态信息（保持笔尖朝下）
-            target_pose = np.append(point, [0.0, np.pi, 0.0])  # [x, y, z, roll, pitch, yaw]
+            # 修改姿态信息，使笔尖保持垂直向下，但允许绕Z轴旋转
+            # roll和yaw设为0，只保留pitch为-pi/2使笔尖向下
+            target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
             
             # 计算逆运动学
             joint_angles = self.arm.get_joint_angles(target_pose)
@@ -66,7 +67,12 @@ class RectangleVisualizer(Node):
                 print(f"警告：无法到达点 {point}")
                 continue
             
+            # 检查关节限制前打印角度值（转换为度显示）
+            print(f"目标点 {point} 的关节角度: {np.degrees(joint_angles)}")
+            
             # 发布关节状态以更新 RVIZ 中的机械臂位置
+            # 确保关节角度是浮点数，并且是弧度单位
+            joint_angles = [float(angle) for angle in joint_angles]
             self.publish_joint_states(joint_angles)
             
             # 等待一小段时间以便观察

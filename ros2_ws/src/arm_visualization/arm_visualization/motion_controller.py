@@ -27,7 +27,17 @@ class MotionController:
         
         print(f"使用 URDF 文件：{urdf_file}")
         
-        # 解析 URDF 文件以获取关节信息
+        # 创建运动链，将jaw_joint设为不活动
+        self.chain = ikpy.chain.Chain.from_urdf_file(
+            urdf_file,
+            active_links_mask=[False, True, True, True, True, True, False, False],  # 将jaw_joint和pen_point_joint设为不活动
+            name="arm"
+        )
+        
+        # 初始化当前关节角度（包括固定关节）
+        self.current_position = [0.0] * 8  # 8个关节，包括固定关节
+        
+        # 解析 URDF 文件以获取关节信息（仅用于显示信息）
         tree = ET.parse(urdf_file)
         root = tree.getroot()
         
@@ -51,14 +61,6 @@ class MotionController:
         print(f"活动关节数: {joint_count}")
         print(f"活动关节掩码: {active_links_mask}")
         
-        # 创建机械臂运动链
-        self.chain = ikpy.chain.Chain.from_urdf_file(
-            urdf_file,
-            base_elements=["base_link"],
-            active_links_mask=active_links_mask,
-            name="arm"
-        )
-        
         # 关节限制
         self.joint_limits = [
             [-1.57, 1.57],  # shoulder_pan_joint
@@ -68,9 +70,6 @@ class MotionController:
             [-1.57, 1.57],  # wrist_roll_joint
             [-0.7, 0.7],    # jaw_joint
         ]
-        
-        # 当前关节角度
-        self.current_joints = [0.0] * 6
         
         # 笔尖相对于末端执行器的偏移
         self.pen_offset = np.array([0.0, 0.0, 0.040525])  # 简化笔尖偏移，只保留Z轴偏移
@@ -129,7 +128,7 @@ class MotionController:
             target_matrix[0:3, 3] = target_pos
             
             # 使用当前关节角度作为初始猜测
-            initial_position = self.current_joints if any(self.current_joints) else None
+            initial_position = self.current_position if any(self.current_position) else None
             
             # 计算逆运动学
             joint_angles = self.chain.inverse_kinematics(
@@ -166,8 +165,8 @@ class MotionController:
                 print(f"实际位置: {actual_pos}")
             
             # 更新当前关节角度
-            self.current_joints = list(joint_angles[1:])  # 跳过第一个元素（base）
-            return self.current_joints
+            self.current_position = list(joint_angles)  # 跳过第一个元素（base）
+            return self.current_position
             
         except Exception as e:
             print(f"计算逆运动学时出错: {e}")

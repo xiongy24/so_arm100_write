@@ -899,8 +899,12 @@ filename="package://arm_description/meshes/xxx.STL"
    3. 在RVIZ中添加 Marker 显示：
       - 点击 "Add" 按钮
       - 选择 "By topic"
-      - 选择 "/visualization_marker"
-      - 即可看到红色的矩形轨迹
+      - 等待 "/visualization_marker" 出现
+      - 选择该话题并确认
+   
+   4. 按照程序提示继续操作：
+      - 完成 Marker 添加后按回车继续
+      - 确认看到红色轨迹后按回车执行运动
 
 3. 优势：
    - 将轨迹可视化功能独立为ROS2功能包，便于维护和复用
@@ -1214,3 +1218,33 @@ filename="package://arm_description/meshes/xxx.STL"
    ```
 
 3. 在RViz中观察轨迹预览，确认无误后按回车键执行实际运动
+
+```
+
+Follow these instructions to make the following change to my code document.
+
+Instruction: Updating progress log with latest changes
+
+Code Edit:
+```
+{{ ... }}
+
+### 2023-12-23 更新
+
+1. **修复了夹爪关节（jaw_joint）的问题**
+   - 发现在写字过程中不需要夹爪关节的运动，因为笔已经固定在夹爪上
+   - 修改了运动链的配置，将jaw_joint设置为不活动关节
+   - 在逆运动学计算中固定jaw_joint的角度为0
+   - 更新了关节角度检查逻辑，只检查前5个活动关节的限制
+
+2. **改进了关节角度处理**
+   - 确保所有关节角度都是正确的浮点数类型
+   - 在显示时将角度转换为度数，方便调试和查看
+   - 在ROS消息中保持使用弧度单位
+
+3. **下一步计划**
+   - 测试修改后的轨迹生成效果
+   - 如果需要，调整运动学参数以获得更好的解
+   - 考虑添加更多的调试信息来帮助分析问题
+
+{{ ... }}

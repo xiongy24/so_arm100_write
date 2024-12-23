@@ -7,9 +7,11 @@ import time
 from typing import List, Dict, Tuple, Optional
 from .trajectory_generator import StrokePoint
 from .motion_controller import MotionController
+from scipy.spatial.transform import Rotation as R
 
 class ArmController:
     def __init__(self):
+        """初始化机械臂控制器"""
         # 定义电机配置
         self.motors = {
             "shoulder_pan_joint": (1, "sts3215"),
@@ -20,27 +22,30 @@ class ArmController:
             "jaw_joint": (6, "sts3215")
         }
         
-        # 关节限制（弧度）
-        self.joint_limits = {
-            "shoulder_pan_joint": (-np.pi, np.pi),
-            "shoulder_lift_joint": (-np.pi/2, np.pi/2),
-            "elbow_joint": (-np.pi/2, np.pi/2),
-            "wrist_pitch_joint": (-np.pi/2, np.pi/2),
-            "wrist_roll_joint": (-np.pi, np.pi),
-            "jaw_joint": (-np.pi/4, np.pi/4)
-        }
+        # 创建运动控制器
+        self.motion_controller = MotionController()
+        
+        # 获取机械臂运动链
+        self.chain = self.motion_controller.chain
+        
+        # 设置关节限制
+        self.joint_limits = [
+            [-2.0, 2.0],       # shoulder_pan_joint  (±120度)
+            [-1.57, 1.57],     # shoulder_lift_joint (±90度)
+            [-1.57, 1.57],     # elbow_joint        (±90度)
+            [-1.57, 1.57],     # wrist_pitch_joint  (±90度)
+            [-3.14, 3.14],     # wrist_roll_joint   (±180度)
+            [-0.78, 0.78],     # jaw_joint          (±45度)
+        ]
         
         # 运动速度参数
         self.max_speed = 200   # 最大速度限制
         
-        # 初始化运动控制器
-        self.motion_controller = MotionController()
-        
         # 初始化总线连接
         self.bus = None
 
-        # 当前关节角度
-        self.current_joints = [0.0] * 6
+        # 初始化当前关节角度
+        self.current_joints = [0.0] * 6  # 6个关节的初始角度都设为0
 
     def rad_to_steps(self, rad: float) -> int:
         """将弧度转换为电机步数"""
@@ -115,88 +120,44 @@ class ArmController:
             print(f"Error getting current joints: {e}")
             return None
 
-    def get_joint_angles(self, target_position):
-        """计算到达目标位置所需的关节角度"""
+    def get_joint_angles(self, target_pose):
+        """计算给定目标位姿的逆运动学解"""
         try:
-            # 确保目标位置是正确的格式
-            target_position = np.array(target_position)
+            # 创建完整的初始位置（包括固定关节）
+            initial_position = [0.0]  # base_link (固定)
+            initial_position.extend(self.current_joints[:5])  # 前5个活动关节
+            initial_position.append(0.0)  # jaw_joint固定为0
+            initial_position.append(0.0)  # pen_point_joint (固定)
             
-            # 如果包含姿态信息，将其转换为变换矩阵
-            if len(target_position) == 6:  # [x, y, z, roll, pitch, yaw]
-                x, y, z = target_position[:3]
-                roll, pitch, yaw = target_position[3:]
-                
-                # 创建旋转矩阵
-                Rx = np.array([[1, 0, 0],
-                             [0, np.cos(roll), -np.sin(roll)],
-                             [0, np.sin(roll), np.cos(roll)]])
-                
-                Ry = np.array([[np.cos(pitch), 0, np.sin(pitch)],
-                             [0, 1, 0],
-                             [-np.sin(pitch), 0, np.cos(pitch)]])
-                
-                Rz = np.array([[np.cos(yaw), -np.sin(yaw), 0],
-                             [np.sin(yaw), np.cos(yaw), 0],
-                             [0, 0, 1]])
-                
-                R = Rz @ Ry @ Rx
-                target_orientation = R
-            else:  # 只有位置信息 [x, y, z]
-                x, y, z = target_position
-                # 默认姿态：笔尖朝下
-                target_orientation = np.array([
-                    [1, 0, 0],
-                    [0, 0, -1],
-                    [0, 1, 0]
-                ])
-            
-            # 使用位置和姿态进行逆运动学计算
-            initial_position = [0.0] * 8  # 从零位置开始计算
-            
-            # 创建目标变换矩阵
-            target_matrix = np.eye(4)
-            target_matrix[:3, :3] = target_orientation
-            target_matrix[:3, 3] = [x, y, z]
-            
-            # 使用 IKPy 的 inverse_kinematics 方法
-            joint_angles = self.motion_controller.chain.inverse_kinematics_frame(
-                target_matrix,
-                initial_position=initial_position,
-                orientation_mode="all",
-                max_iter=100
+            # 使用IKPY计算逆运动学
+            joint_angles = self.chain.inverse_kinematics(
+                target_position=target_pose[:3],
+                target_orientation=R.from_euler('xyz', target_pose[3:]).as_matrix(),
+                orientation_mode="all",  # 考虑所有轴的方向
+                max_iter=10000,  # 增加最大迭代次数
+                initial_position=initial_position
             )
             
-            # 只返回活动关节的角度（去掉原点链接和笔尖固定关节）
-            active_joint_angles = [joint_angles[i] for i in range(1, 7)]
+            # 只取活动关节的角度（跳过第一个和最后两个固定关节）
+            active_joint_angles = list(joint_angles[1:6])  # 只取前5个活动关节
+            active_joint_angles.append(0.0)  # jaw_joint固定为0
             
-            # 检查关节限制
-            if self.check_joint_limits(active_joint_angles):
-                return active_joint_angles
-            else:
-                print(f"警告：计算出的关节角度超出限制：{active_joint_angles}")
-                return None
-                
+            # 确保所有角度都是浮点数
+            active_joint_angles = [float(angle) for angle in active_joint_angles]
+            
+            # 检查关节限制（只检查前5个关节）
+            for i, angle in enumerate(active_joint_angles[:5]):
+                if angle < self.joint_limits[i][0] or angle > self.joint_limits[i][1]:
+                    print(f"警告：关节 {i+1} 角度 {np.degrees(angle):.2f}° 超出限制范围 [{np.degrees(self.joint_limits[i][0]):.2f}°, {np.degrees(self.joint_limits[i][1]):.2f}°]")
+                    return None
+            
+            # 更新当前关节角度
+            self.current_joints = active_joint_angles
+            return active_joint_angles
+            
         except Exception as e:
-            print(f"计算逆运动学时出错：{e}")
-            import traceback
-            traceback.print_exc()
+            print(f"逆运动学计算错误: {str(e)}")
             return None
-
-    def check_joint_limits(self, joint_angles):
-        """检查关节角度是否在限制范围内"""
-        joint_limits = [
-            [-2.0, 2.0],       # shoulder_pan_joint  (±120度)
-            [-1.57, 1.57],     # shoulder_lift_joint (±90度)
-            [-1.57, 1.57],     # elbow_joint        (±90度)
-            [-1.57, 1.57],     # wrist_pitch_joint  (±90度)
-            [-3.14, 3.14],     # wrist_roll_joint   (±180度)
-            [-0.78, 0.78],     # jaw_joint          (±45度)
-        ]
-        
-        for angle, limits in zip(joint_angles, joint_limits):
-            if angle < limits[0] or angle > limits[1]:
-                return False
-        return True
 
     def move_to_joint_angles(self, target_angles: List[float]) -> bool:
         """移动到指定的关节角度（弧度）"""
@@ -210,9 +171,10 @@ class ArmController:
                 return False
             
             # 检查关节限制
-            if not self.check_joint_limits(target_angles):
-                print(f"警告：目标关节角度超出限制：{target_angles}")
-                return False
+            for i, angle in enumerate(target_angles):
+                if angle < self.joint_limits[i][0] or angle > self.joint_limits[i][1]:
+                    print(f"警告：关节 {i+1} 角度 {np.degrees(angle):.2f}° 超出限制范围 [{np.degrees(self.joint_limits[i][0]):.2f}°, {np.degrees(self.joint_limits[i][1]):.2f}°]")
+                    return False
             
             # 将目标角度转换为电机步数
             target_positions = [self.rad_to_steps(angle) for angle in target_angles]

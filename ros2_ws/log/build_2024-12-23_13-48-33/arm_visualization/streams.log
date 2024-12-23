@@ -1,0 +1,18 @@
+[0.673s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build --no-deps symlink_data
+[0.849s] running develop
+[0.979s] running egg_info
+[0.979s] writing arm_visualization.egg-info/PKG-INFO
+[0.979s] writing dependency_links to arm_visualization.egg-info/dependency_links.txt
+[0.979s] writing entry points to arm_visualization.egg-info/entry_points.txt
+[0.980s] writing requirements to arm_visualization.egg-info/requires.txt
+[0.980s] writing top-level names to arm_visualization.egg-info/top_level.txt
+[0.981s] reading manifest file 'arm_visualization.egg-info/SOURCES.txt'
+[0.982s] writing manifest file 'arm_visualization.egg-info/SOURCES.txt'
+[0.983s] running build_ext
+[0.983s] Creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm-visualization.egg-link (link to .)
+[0.983s] Installing rectangle_gui script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+[0.983s] Installing rectangle_visualizer script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+[0.984s] 
+[0.984s] Installed /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization
+[0.984s] running symlink_data
+[1.008s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization' returned '0': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build --no-deps symlink_data
