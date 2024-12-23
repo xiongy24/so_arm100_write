@@ -1,3 +1,4 @@
 [console_scripts]
+rectangle_gui = arm_visualization.rectangle_gui_controller:main
 rectangle_visualizer = arm_visualization.rectangle_visualizer:main
 

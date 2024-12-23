@@ -876,7 +876,7 @@ filename="package://arm_description/meshes/xxx.STL"
    - 运行 `ros2 launch arm_description display.launch.py` 启动RVIZ
    - 运行 `test_draw_rectangle.py` 程序
    - 在RVIZ中查看红色轨迹线
-   - 确认轨迹无误后，按回车键执行实际运动
+   - 确认轨迹无误后按回车键执行实际运动
 
 ### 2024-12-22 23:42
 #### 创建轨迹可视化功能包
@@ -1144,8 +1144,7 @@ filename="package://arm_description/meshes/xxx.STL"
 
 2. 在第二个终端中运行可视化节点：
    ```bash
-   cd /home/ubuntu22/so_arm100_write/ros2_ws
-   source install/setup.bash
+   source /home/ubuntu22/so_arm100_write/ros2_ws/install/setup.bash
    ros2 run arm_visualization rectangle_visualizer
    ```
 
@@ -1156,9 +1155,62 @@ filename="package://arm_description/meshes/xxx.STL"
      * `/visualization_marker`：显示预期轨迹（红色）和预览轨迹（蓝色）
      * `/current_path_marker`：显示实际执行的轨迹（绿色）
 
-4. 观察 RVIZ 中显示的预览轨迹，确认无误后按回车键开始执行实际运动
+4. 按照程序提示操作：
+   - 确认完成 RVIZ 设置后按回车继续
+   - 在 RVIZ 中查看红色轨迹线
+   - 确认轨迹正确后按回车执行实际运动
 
 #### 5. 下一步计划
 1. 优化轨迹规划参数，使运动更加平滑
 2. 添加更多的安全检查，如工作空间边界检查
 3. 实现更复杂的图形绘制功能
+
+### 2024-12-23 进展
+1. 创建了矩形轨迹位置控制GUI（rectangle_gui_controller.py）
+2. 发现并解决了RViz2显示问题：需要先运行`ros2 launch arm_description display.launch.py`启动机器人模型，然后再运行其他可视化程序
+3. GUI功能包括：
+   - X、Y、Z轴位置实时调整
+   - 实时预览轨迹位置
+   - 位置保存功能
+
+使用步骤：
+1. `ros2 launch arm_description display.launch.py` - 启动机器人模型显示
+2. `source install/setup.bash && ros2 run arm_visualization rectangle_gui` - 启动GUI控制器
+3. 使用GUI调整矩形轨迹位置
+4. 确认位置后点击"保存位置"按钮
+
+```
+### 2024-12-23 00:24
+#### Y轴调整
+1. 调整了Y轴的默认距离为-0.6米，并扩大了Y轴的可调范围到-0.8米
+2. 修改了rectangle_gui_controller.py文件中的Y轴参数
+3. 重新编译和运行
+
+使用步骤：
+1. `ros2 launch arm_description display.launch.py` - 启动机器人模型显示
+2. `ros2 run arm_visualization rectangle_gui` - 启动GUI控制器
+3. 使用GUI调整矩形轨迹位置
+4. 确认位置后点击"保存位置"按钮
+
+```
+
+### 2024-12-23 12:54
+#### 实现保存位置到轨迹执行的功能
+1. 修改了`rectangle_visualizer.py`，添加了从保存文件读取位置信息的功能
+2. 程序流程更新为：
+   a. 使用GUI控制器调整位置并保存
+   b. 运行`rectangle_visualizer`读取保存的位置并执行轨迹
+
+执行步骤：
+1. 使用GUI调整并保存位置：
+   ```bash
+   ros2 launch arm_description display.launch.py
+   source install/setup.bash && ros2 run arm_visualization rectangle_gui
+   ```
+
+2. 执行保存位置的轨迹：
+   ```bash
+   source install/setup.bash && ros2 run arm_visualization rectangle_visualizer
+   ```
+
+3. 在RViz中观察轨迹预览，确认无误后按回车键执行实际运动

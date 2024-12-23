@@ -77,19 +77,31 @@ class RectangleVisualizer(Node):
 
     def move_rectangle(self):
         """执行矩形轨迹运动"""
-        # 设置矩形参数（单位：米）
-        width = 0.08    # 宽度
-        height = 0.08   # 高度
-        z_offset = 0.05  # 距离基座高度（降低到接近地面）
-        y_offset = -0.2  # 距离基座Y轴负方向的距离
+        # 从文件读取位置信息
+        try:
+            with open('/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_visualization/rectangle_position.txt', 'r') as f:
+                position_data = {}
+                for line in f:
+                    key, value = line.strip().split(': ')
+                    position_data[key] = float(value)
+            
+            # 设置矩形参数（单位：米）
+            width = 0.08    # 宽度
+            height = 0.08   # 高度
+            x_offset = position_data['x']  # 从文件读取的X偏移
+            y_offset = position_data['y']  # 从文件读取的Y偏移
+            z_offset = position_data['z']  # 从文件读取的Z偏移
+        except (FileNotFoundError, KeyError, ValueError) as e:
+            self.get_logger().error(f'Error reading position file: {str(e)}')
+            return
         
         # 定义矩形的四个角点（基于基座坐标系）
         points = [
-            np.array([0.0, y_offset, z_offset]),               # 左下角
-            np.array([width, y_offset, z_offset]),             # 右下角
-            np.array([width, y_offset + width, z_offset]),     # 右上角
-            np.array([0.0, y_offset + width, z_offset]),       # 左上角
-            np.array([0.0, y_offset, z_offset])                # 回到起点
+            np.array([x_offset, y_offset, z_offset]),               # 左下角
+            np.array([x_offset + width, y_offset, z_offset]),             # 右下角
+            np.array([x_offset + width, y_offset + width, z_offset]),     # 右上角
+            np.array([x_offset, y_offset + width, z_offset]),       # 左上角
+            np.array([x_offset, y_offset, z_offset])                # 回到起点
         ]
         
         # 发布预期轨迹（红色）

@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'rectangle_visualizer = arm_visualization.rectangle_visualizer:main'
+            'rectangle_visualizer = arm_visualization.rectangle_visualizer:main',
+            'rectangle_gui = arm_visualization.rectangle_gui_controller:main'
         ],
     },
     package_data={

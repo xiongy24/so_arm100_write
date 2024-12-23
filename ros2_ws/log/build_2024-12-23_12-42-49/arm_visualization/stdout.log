@@ -1,0 +1,18 @@
+running develop
+running egg_info
+writing arm_visualization.egg-info/PKG-INFO
+writing dependency_links to arm_visualization.egg-info/dependency_links.txt
+writing entry points to arm_visualization.egg-info/entry_points.txt
+writing requirements to arm_visualization.egg-info/requires.txt
+writing top-level names to arm_visualization.egg-info/top_level.txt
+reading manifest file 'arm_visualization.egg-info/SOURCES.txt'
+writing manifest file 'arm_visualization.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm-visualization.egg-link (link to .)
+Installing rectangle_gui script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+Installing rectangle_visualizer script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+
+Installed /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization
+running symlink_data
+symbolically linking /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/resource/arm_visualization -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/ament_index/resource_index/packages
+symbolically linking /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/package.xml -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/arm_visualization
