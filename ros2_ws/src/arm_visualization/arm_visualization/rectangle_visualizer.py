@@ -87,7 +87,7 @@ class RectangleVisualizer(Node):
         """更新当前关节角度"""
         self.current_angles = [float(angle) for angle in joint_angles]
 
-    def interpolate_path(self, start_point, end_point, num_points=20):
+    def interpolate_path(self, start_point, end_point, num_points=150):
         """在两点之间插值生成平滑路径"""
         path = []
         for i in range(num_points):
@@ -120,9 +120,17 @@ class RectangleVisualizer(Node):
             time.sleep(0.1)
         
         # 预览每个点的关节角度
+        print("\n开始轨迹预览（每段插值150个点）...")
         for i in range(len(points) - 1):
+            print(f"\n预览第 {i+1}/{len(points)-1} 段轨迹")
+            
             # 在相邻两点之间生成平滑路径
             interpolated_points = self.interpolate_path(points[i], points[i + 1])
+            
+            # 计算这段轨迹的总长度
+            segment_length = np.linalg.norm(points[i+1] - points[i])
+            # 根据轨迹长度动态调整延时，使速度保持恒定
+            point_delay = 0.02  # 基础延时20ms
             
             for point in interpolated_points:
                 # 设置目标姿态（笔尖垂直向下）
@@ -148,7 +156,7 @@ class RectangleVisualizer(Node):
                 
                 # 发布关节状态
                 self.publish_joint_states()
-                time.sleep(0.2)  # 降低速度，增加平滑度
+                time.sleep(point_delay)  # 使用更小的延时实现连续运动
 
     def move_rectangle(self):
         """执行矩形轨迹运动"""
@@ -199,7 +207,7 @@ class RectangleVisualizer(Node):
             # 执行实际运动
             print("\n开始执行实际运动...")
             
-            # 如果是实际硬件模式，先移动到初始位置
+            # 如果是实际硬件模式，只在第一次移动到初始位置
             if not self.arm.simulation_mode:
                 print("正在移动到初始位置...")
                 if not self.arm.move_to_zero():
@@ -212,16 +220,26 @@ class RectangleVisualizer(Node):
             self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
             self.current_path_pub.publish(self.current_path_marker)
             
+            # 记录上一个点的关节角度，用于下一次运动的初始位置
+            last_joint_angles = None
+            
             for i in range(len(points) - 1):
+                print(f"\n执行第 {i+1}/{len(points)-1} 段轨迹")
+                
                 # 在相邻两点之间生成平滑路径
                 interpolated_points = self.interpolate_path(points[i], points[i + 1])
+                
+                # 计算这段轨迹的总长度
+                segment_length = np.linalg.norm(points[i+1] - points[i])
+                # 根据轨迹长度动态调整延时，使速度保持恒定
+                point_delay = 0.02  # 基础延时20ms
                 
                 for point in interpolated_points:
                     # 设置目标姿态（笔尖垂直向下）
                     target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
                     
-                    # 计算逆运动学
-                    joint_angles = self.arm.get_joint_angles(target_pose)
+                    # 计算逆运动学，使用上一个点的关节角度作为初始位置
+                    joint_angles = self.arm.get_joint_angles(target_pose, initial_position=last_joint_angles)
                     if joint_angles is None:
                         print(f"警告：无法到达点 {point}")
                         continue
@@ -237,8 +255,11 @@ class RectangleVisualizer(Node):
                     self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
                     self.current_path_pub.publish(self.current_path_marker)
                     
+                    # 记录当前关节角度，用于下一次运动
+                    last_joint_angles = joint_angles
+                    
                     # 等待运动完成
-                    time.sleep(0.1)  # 降低速度，增加平滑度
+                    time.sleep(point_delay)  # 使用更小的延时实现连续运动
             
             print("矩形轨迹执行完成！")
             
