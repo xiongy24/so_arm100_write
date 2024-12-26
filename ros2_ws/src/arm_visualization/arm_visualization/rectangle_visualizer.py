@@ -87,6 +87,22 @@ class RectangleVisualizer(Node):
         """更新当前关节角度"""
         self.current_angles = [float(angle) for angle in joint_angles]
 
+    def interpolate_path(self, start_point, end_point, num_points=20):
+        """在两点之间插值生成平滑路径"""
+        path = []
+        for i in range(num_points):
+            t = i / (num_points - 1)
+            point = start_point * (1 - t) + end_point * t
+            path.append(point)
+        return path
+
+    def is_point_in_list(self, point, points_list, tolerance=1e-6):
+        """检查点是否在点列表中"""
+        for p in points_list:
+            if np.allclose(point, p, atol=tolerance):
+                return True
+        return False
+
     def preview_trajectory(self, points):
         """预览轨迹"""
         print("\n开始轨迹预览...")
@@ -104,30 +120,35 @@ class RectangleVisualizer(Node):
             time.sleep(0.1)
         
         # 预览每个点的关节角度
-        for point in points:
-            # 设置目标姿态（笔尖垂直向下）
-            target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
+        for i in range(len(points) - 1):
+            # 在相邻两点之间生成平滑路径
+            interpolated_points = self.interpolate_path(points[i], points[i + 1])
             
-            # 计算逆运动学
-            joint_angles = self.arm.get_joint_angles(target_pose)
-            if joint_angles is None:
-                print(f"警告：无法计算点 {point} 的逆运动学解")
-                continue
-            
-            # 更新当前关节角度（用于可视化）
-            self.current_angles = joint_angles
-            
-            # 显示关节角度（角度制）
-            print(f"目标点 {point} 的关节角度: {np.degrees(joint_angles)}")
-            
-            # 更新当前路径标记
-            self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))
-            self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
-            self.current_path_pub.publish(self.current_path_marker)
-            
-            # 发布关节状态
-            self.publish_joint_states()
-            time.sleep(0.5)  # 给RVIZ时间更新显示
+            for point in interpolated_points:
+                # 设置目标姿态（笔尖垂直向下）
+                target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
+                
+                # 计算逆运动学
+                joint_angles = self.arm.get_joint_angles(target_pose)
+                if joint_angles is None:
+                    print(f"警告：无法计算点 {point} 的逆运动学解")
+                    continue
+                
+                # 更新当前关节角度（用于可视化）
+                self.current_angles = joint_angles
+                
+                # 显示关节角度（角度制）
+                if self.is_point_in_list(point, points):  # 只显示关键点的角度
+                    print(f"目标点 {point} 的关节角度: {np.degrees(joint_angles)}")
+                
+                # 更新当前路径标记
+                self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))
+                self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
+                self.current_path_pub.publish(self.current_path_marker)
+                
+                # 发布关节状态
+                self.publish_joint_states()
+                time.sleep(0.2)  # 降低速度，增加平滑度
 
     def move_rectangle(self):
         """执行矩形轨迹运动"""
@@ -191,29 +212,33 @@ class RectangleVisualizer(Node):
             self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
             self.current_path_pub.publish(self.current_path_marker)
             
-            for point in points:
-                # 设置目标姿态（笔尖垂直向下）
-                target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
+            for i in range(len(points) - 1):
+                # 在相邻两点之间生成平滑路径
+                interpolated_points = self.interpolate_path(points[i], points[i + 1])
                 
-                # 计算逆运动学
-                joint_angles = self.arm.get_joint_angles(target_pose)
-                if joint_angles is None:
-                    print(f"警告：无法到达点 {point}")
-                    continue
-                
-                # 移动到目标位置
-                success = self.arm.move_to_joint_angles(joint_angles)
-                if not success:
-                    print(f"警告：移动到点 {point} 失败")
-                    continue
-                
-                # 更新实际路径标记
-                self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))
-                self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
-                self.current_path_pub.publish(self.current_path_marker)
-                
-                # 等待运动完成
-                time.sleep(0.5)
+                for point in interpolated_points:
+                    # 设置目标姿态（笔尖垂直向下）
+                    target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
+                    
+                    # 计算逆运动学
+                    joint_angles = self.arm.get_joint_angles(target_pose)
+                    if joint_angles is None:
+                        print(f"警告：无法到达点 {point}")
+                        continue
+                    
+                    # 移动到目标位置
+                    success = self.arm.move_to_joint_angles(joint_angles)
+                    if not success:
+                        print(f"警告：移动到点 {point} 失败")
+                        continue
+                    
+                    # 更新实际路径标记
+                    self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))
+                    self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
+                    self.current_path_pub.publish(self.current_path_marker)
+                    
+                    # 等待运动完成
+                    time.sleep(0.1)  # 降低速度，增加平滑度
             
             print("矩形轨迹执行完成！")
             

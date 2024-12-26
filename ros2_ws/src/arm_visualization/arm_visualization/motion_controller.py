@@ -30,12 +30,33 @@ class MotionController:
         # 创建运动链，将jaw_joint设为不活动
         self.chain = ikpy.chain.Chain.from_urdf_file(
             urdf_file,
-            active_links_mask=[False, True, True, True, True, True, False, False],  # 将jaw_joint和pen_point_joint设为不活动
+            base_elements=["base_link"],
             name="arm"
         )
         
+        # 打印关节信息
+        for i, link in enumerate(self.chain.links):
+            if i > 0:  # 跳过base_link
+                print(f"找到关节: {link.name} (类型: {link.joint_type})")
+        
+        print(f"总链接数: {len(self.chain.links)} (包括原点链接)")
+        print(f"活动关节数: {len(self.chain.active_links_mask)}")
+        
+        # 设置活动关节掩码，禁用jaw_joint和wrist_roll_joint
+        self.chain.active_links_mask = [
+            False,  # base_link -> shoulder_pan_joint
+            True,   # shoulder_pan_joint
+            True,   # shoulder_lift_joint
+            True,   # elbow_joint
+            True,   # wrist_pitch_joint
+            False,  # wrist_roll_joint (固定不动)
+            False,  # jaw_joint (固定不动)
+            False   # pen_point_joint
+        ]
+        print(f"活动关节掩码: {self.chain.active_links_mask}")
+        
         # 初始化当前关节角度（包括固定关节）
-        self.current_position = [0.0] * 8  # 8个关节，包括固定关节
+        self.current_position = [0.0] * len(self.chain.links)
         
         # 解析 URDF 文件以获取关节信息（仅用于显示信息）
         tree = ET.parse(urdf_file)
@@ -145,6 +166,11 @@ class MotionController:
             print("\n计算得到的关节角度（弧度）:")
             for i, angle in enumerate(joint_angles[1:]):  # 跳过第一个元素（base）
                 print(f"Joint {i}: {angle:.3f} rad ({math.degrees(angle):.1f} deg)")
+            
+            # 确保wrist_roll_joint和jaw_joint保持在0位置
+            if joint_angles is not None:
+                joint_angles[5] = 0.0  # wrist_roll_joint
+                joint_angles[6] = 0.0  # jaw_joint
             
             # 检查关节限制
             for i, (angle, (min_angle, max_angle)) in enumerate(zip(joint_angles[1:], self.joint_limits)):
