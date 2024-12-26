@@ -43,9 +43,12 @@ class ArmController:
         
         # 初始化总线连接
         self.bus = None
-
+        
         # 初始化当前关节角度
         self.current_joints = [0.0] * 6  # 6个关节的初始角度都设为0
+        
+        # 是否处于仿真模式
+        self.simulation_mode = True
 
     def rad_to_steps(self, rad: float) -> int:
         """将弧度转换为电机步数"""
@@ -162,9 +165,6 @@ class ArmController:
     def move_to_joint_angles(self, target_angles: List[float]) -> bool:
         """移动到指定的关节角度（弧度）"""
         try:
-            if not self.bus:
-                return False
-                
             # 检查输入参数
             if len(target_angles) != len(self.motors):
                 print(f"Expected {len(self.motors)} angles, got {len(target_angles)}")
@@ -176,34 +176,42 @@ class ArmController:
                     print(f"警告：关节 {i+1} 角度 {np.degrees(angle):.2f}° 超出限制范围 [{np.degrees(self.joint_limits[i][0]):.2f}°, {np.degrees(self.joint_limits[i][1]):.2f}°]")
                     return False
             
-            # 将目标角度转换为电机步数
-            target_positions = [self.rad_to_steps(angle) for angle in target_angles]
-            
-            # 获取当前位置
-            current_positions = []
-            for joint_name in self.motors.keys():
-                pos = self.bus.read("Present_Position", joint_name)
-                if pos is None:
+            if self.simulation_mode:
+                # 在仿真模式下，直接更新关节角度
+                self.current_joints = target_angles
+                return True
+            else:
+                # 实际硬件控制代码
+                if not self.bus:
                     return False
-                current_positions.append(pos)
-            
-            # 生成平滑路径
-            path_points = self.interpolate_path(current_positions, target_positions)
-            
-            # 执行运动
-            joint_names = list(self.motors.keys())
-            for positions in path_points:
-                for i, joint_name in enumerate(joint_names):
-                    self.bus.write("Goal_Position", positions[i], joint_name)
-                time.sleep(0.02)  # 50Hz控制频率
-            
-            # 更新当前关节角度
-            self.current_joints = target_angles
-            
-            return True
+                
+                # 将目标角度转换为电机步数
+                target_positions = [self.rad_to_steps(angle) for angle in target_angles]
+                
+                # 获取当前位置
+                current_positions = []
+                for joint_name in self.motors.keys():
+                    pos = self.bus.read("Present_Position", joint_name)
+                    if pos is None:
+                        return False
+                    current_positions.append(pos)
+                
+                # 生成平滑路径
+                path_points = self.interpolate_path(current_positions, target_positions)
+                
+                # 执行运动
+                joint_names = list(self.motors.keys())
+                for positions in path_points:
+                    for i, joint_name in enumerate(joint_names):
+                        self.bus.write("Goal_Position", positions[i], joint_name)
+                    time.sleep(0.02)  # 50Hz控制频率
+                
+                # 更新当前关节角度
+                self.current_joints = target_angles
+                return True
             
         except Exception as e:
-            print(f"Error moving to joint angles: {e}")
+            print(f"移动关节时出错: {str(e)}")
             return False
 
     def move_to_pose(self, x: float, y: float, z: float, roll: float, pitch: float, yaw: float) -> bool:

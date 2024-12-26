@@ -14,29 +14,52 @@ from sensor_msgs.msg import JointState
 class RectangleVisualizer(Node):
     def __init__(self):
         super().__init__('rectangle_visualizer')
+        
+        # 创建机械臂控制器
         self.arm = ArmController()
         
-        # 创建发布者
-        self.marker_pub = self.create_publisher(Marker, 'visualization_marker', 10)
-        self.current_path_pub = self.create_publisher(Marker, 'current_path_marker', 10)
-        self.joint_state_pub = self.create_publisher(JointState, 'joint_states', 10)
+        # 连接机械臂
+        print("正在连接机械臂...")
+        if not self.arm.connect():
+            print("警告：无法连接到机械臂，将在仿真模式下运行")
+            self.arm.simulation_mode = True
+        else:
+            self.arm.simulation_mode = False
+            
+        # 创建Marker发布器
+        self.marker_pub = self.create_publisher(Marker, '/visualization_marker', 10)
+        self.current_path_pub = self.create_publisher(Marker, '/current_path_marker', 10)
         
-        # 初始化消息
+        # 创建关节状态发布器
+        self.joint_state_pub = self.create_publisher(JointState, '/joint_states', 10)
+        
+        # 创建定时器，10Hz发布关节状态
+        self.timer = self.create_timer(0.1, self.publish_joint_states)
+        
+        # 初始化Marker
         self.marker = Marker()
         self.marker.header.frame_id = "base_link"
+        self.marker.ns = "expected_path"
+        self.marker.id = 0
         self.marker.type = Marker.LINE_STRIP
         self.marker.action = Marker.ADD
-        self.marker.scale.x = 0.001  # 线宽
-        self.marker.color = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)  # 红色
+        self.marker.pose.orientation.w = 1.0
+        self.marker.scale.x = 0.005  # 线宽
+        self.marker.color.r = 1.0  # 红色
+        self.marker.color.a = 1.0  # 不透明度
         
         self.current_path_marker = Marker()
         self.current_path_marker.header.frame_id = "base_link"
+        self.current_path_marker.ns = "current_path"
+        self.current_path_marker.id = 1
         self.current_path_marker.type = Marker.LINE_STRIP
         self.current_path_marker.action = Marker.ADD
-        self.current_path_marker.scale.x = 0.001  # 线宽
-        self.current_path_marker.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)  # 绿色
+        self.current_path_marker.pose.orientation.w = 1.0
+        self.current_path_marker.scale.x = 0.005  # 线宽
+        self.current_path_marker.color.g = 1.0  # 绿色
+        self.current_path_marker.color.a = 1.0  # 不透明度
         
-        # 创建关节状态消息
+        # 初始化关节状态消息
         self.joint_state_msg = JointState()
         self.joint_state_msg.name = [
             'shoulder_pan_joint',
@@ -46,45 +69,70 @@ class RectangleVisualizer(Node):
             'wrist_roll_joint',
             'jaw_joint'
         ]
+        # 初始化速度和加速度字段为空列表
+        self.joint_state_msg.velocity = []
+        self.joint_state_msg.effort = []
+        
+        # 存储当前关节角度
+        self.current_angles = [0.0] * 6
 
-    def publish_joint_states(self, joint_angles):
+    def publish_joint_states(self):
         """发布关节状态以在 RVIZ 中更新机械臂位置"""
-        self.joint_state_msg.header.stamp = self.get_clock().now().to_msg()
-        self.joint_state_msg.position = joint_angles
+        now = self.get_clock().now()
+        self.joint_state_msg.header.stamp = now.to_msg()
+        self.joint_state_msg.position = self.current_angles
         self.joint_state_pub.publish(self.joint_state_msg)
 
+    def update_joint_angles(self, joint_angles):
+        """更新当前关节角度"""
+        self.current_angles = [float(angle) for angle in joint_angles]
+
     def preview_trajectory(self, points):
-        """在 RVIZ 中预览轨迹"""
+        """预览轨迹"""
         print("\n开始轨迹预览...")
+        
+        # 更新轨迹标记点
+        self.marker.points = [Point(x=p[0], y=p[1], z=p[2]) for p in points]
+        self.marker.header.stamp = self.get_clock().now().to_msg()
+        
+        # 持续发布轨迹消息，直到确认RVIZ已接收
+        print("正在发布轨迹可视化消息...")
+        start_time = self.get_clock().now()
+        while (self.get_clock().now() - start_time).nanoseconds / 1e9 < 5.0:  # 发布5秒
+            self.marker_pub.publish(self.marker)
+            self.current_path_pub.publish(self.current_path_marker)
+            time.sleep(0.1)
+        
+        # 预览每个点的关节角度
         for point in points:
-            # 修改姿态信息，使笔尖保持垂直向下，但允许绕Z轴旋转
-            # roll和yaw设为0，只保留pitch为-pi/2使笔尖向下
+            # 设置目标姿态（笔尖垂直向下）
             target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
             
             # 计算逆运动学
             joint_angles = self.arm.get_joint_angles(target_pose)
             if joint_angles is None:
-                print(f"警告：无法到达点 {point}")
+                print(f"警告：无法计算点 {point} 的逆运动学解")
                 continue
             
-            # 检查关节限制前打印角度值（转换为度显示）
+            # 更新当前关节角度（用于可视化）
+            self.current_angles = joint_angles
+            
+            # 显示关节角度（角度制）
             print(f"目标点 {point} 的关节角度: {np.degrees(joint_angles)}")
             
-            # 发布关节状态以更新 RVIZ 中的机械臂位置
-            # 确保关节角度是浮点数，并且是弧度单位
-            joint_angles = [float(angle) for angle in joint_angles]
-            self.publish_joint_states(joint_angles)
+            # 更新当前路径标记
+            self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))
+            self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
+            self.current_path_pub.publish(self.current_path_marker)
             
-            # 等待一小段时间以便观察
-            time.sleep(0.1)
-        
-        print("轨迹预览完成。按回车键执行实际运动，或按 Ctrl+C 取消...")
-        input()
+            # 发布关节状态
+            self.publish_joint_states()
+            time.sleep(0.5)  # 给RVIZ时间更新显示
 
     def move_rectangle(self):
         """执行矩形轨迹运动"""
-        # 从文件读取位置信息
         try:
+            # 从文件读取位置信息
             with open('/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_visualization/rectangle_position.txt', 'r') as f:
                 position_data = {}
                 for line in f:
@@ -97,57 +145,85 @@ class RectangleVisualizer(Node):
             x_offset = position_data['x']  # 从文件读取的X偏移
             y_offset = position_data['y']  # 从文件读取的Y偏移
             z_offset = position_data['z']  # 从文件读取的Z偏移
-        except (FileNotFoundError, KeyError, ValueError) as e:
-            self.get_logger().error(f'Error reading position file: {str(e)}')
-            return
-        
-        # 定义矩形的四个角点（基于基座坐标系）
-        points = [
-            np.array([x_offset, y_offset, z_offset]),               # 左下角
-            np.array([x_offset + width, y_offset, z_offset]),             # 右下角
-            np.array([x_offset + width, y_offset + width, z_offset]),     # 右上角
-            np.array([x_offset, y_offset + width, z_offset]),       # 左上角
-            np.array([x_offset, y_offset, z_offset])                # 回到起点
-        ]
-        
-        # 发布预期轨迹（红色）
-        self.marker.header.stamp = self.get_clock().now().to_msg()
-        self.marker.points = [Point(x=p[0], y=p[1], z=p[2]) for p in points]
-        print("\n正在发布轨迹可视化消息...")
-        
-        # 持续发布5秒，确保RVIZ能接收到消息
-        start_time = time.time()
-        while time.time() - start_time < 5.0:
-            self.marker_pub.publish(self.marker)
-            time.sleep(0.1)
-        
-        print("\n已持续发布5秒消息，现在应该可以在RVIZ的 'By topic' 中看到 '/visualization_marker'。")
-        print("完成Marker添加后，按回车键继续...")
-        input()
-        
-        print("\n继续发布轨迹可视化消息...")
-        
-        # 预览轨迹
-        self.preview_trajectory(points)
-        
-        # 执行实际运动
-        print("\n开始执行实际运动...")
-        self.current_path_marker.points = []  # 清空当前路径
-        
-        for point in points:
-            # 移动到目标点
-            success = self.arm.move_to(point)
-            if not success:
-                print(f"无法到达点 {point}")
-                continue
             
-            # 记录实际路径
-            current_pos = self.arm.get_current_position()
-            self.current_path_marker.points.append(Point(x=current_pos[0], y=current_pos[1], z=current_pos[2]))
+            # 生成矩形轨迹点
+            points = [
+                np.array([x_offset, y_offset, z_offset]),  # 左下角
+                np.array([x_offset + width, y_offset, z_offset]),  # 右下角
+                np.array([x_offset + width, y_offset + height, z_offset]),  # 右上角
+                np.array([x_offset, y_offset + height, z_offset]),  # 左上角
+                np.array([x_offset, y_offset, z_offset])  # 回到起点
+            ]
+            
+            # 等待用户完成RViz设置
+            print("\n请在RViz中添加两个Marker显示：")
+            print("1. 点击 'Add' 按钮")
+            print("2. 选择 'By topic'")
+            print("3. 等待 '/visualization_marker' 和 '/current_path_marker' 出现")
+            print("4. 分别选择这两个话题")
+            print("5. 点击 'OK' 确认")
+            input("\n完成RViz设置后，按回车键继续...")
+            
+            # 清空当前路径标记
+            self.current_path_marker.points = []
             self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
             self.current_path_pub.publish(self.current_path_marker)
-        
-        print("运动完成！")
+            
+            # 预览轨迹
+            self.preview_trajectory(points)
+            
+            # 等待用户确认
+            input("\n轨迹预览完成。按回车键执行实际运动，或按 Ctrl+C 取消...\n")
+            
+            # 执行实际运动
+            print("\n开始执行实际运动...")
+            
+            # 如果是实际硬件模式，先移动到初始位置
+            if not self.arm.simulation_mode:
+                print("正在移动到初始位置...")
+                if not self.arm.move_to_zero():
+                    print("错误：无法移动到初始位置")
+                    return
+                time.sleep(2)  # 等待稳定
+            
+            # 清空实际路径标记
+            self.current_path_marker.points = []
+            self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
+            self.current_path_pub.publish(self.current_path_marker)
+            
+            for point in points:
+                # 设置目标姿态（笔尖垂直向下）
+                target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
+                
+                # 计算逆运动学
+                joint_angles = self.arm.get_joint_angles(target_pose)
+                if joint_angles is None:
+                    print(f"警告：无法到达点 {point}")
+                    continue
+                
+                # 移动到目标位置
+                success = self.arm.move_to_joint_angles(joint_angles)
+                if not success:
+                    print(f"警告：移动到点 {point} 失败")
+                    continue
+                
+                # 更新实际路径标记
+                self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))
+                self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
+                self.current_path_pub.publish(self.current_path_marker)
+                
+                # 等待运动完成
+                time.sleep(0.5)
+            
+            print("矩形轨迹执行完成！")
+            
+        except Exception as e:
+            self.get_logger().error(f'Error executing rectangle trajectory: {str(e)}')
+            
+        finally:
+            # 如果是实际硬件模式，断开连接
+            if not self.arm.simulation_mode:
+                self.arm.disconnect()
 
 def main(args=None):
     rclpy.init(args=args)
