@@ -7,8 +7,8 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 import numpy as np
-from .arm_controller import ArmController
 import time
+from .arm_controller import ArmController
 from sensor_msgs.msg import JointState
 
 class RectangleVisualizer(Node):
@@ -25,6 +25,19 @@ class RectangleVisualizer(Node):
             self.arm.simulation_mode = True
         else:
             self.arm.simulation_mode = False
+            # 移动到初始位置
+            print("正在移动到电机零位...")
+            if not self.arm.move_to_zero():
+                print("错误：无法移动到电机零位")
+                self.arm.simulation_mode = True
+            else:
+                time.sleep(2)  # 等待稳定
+                print("正在移动到URDF初始位置...")
+                if not self.arm.move_to_urdf_init():
+                    print("错误：无法移动到URDF初始位置")
+                    self.arm.simulation_mode = True
+                else:
+                    print("已到达URDF初始位置")
             
         # 创建Marker发布器
         self.marker_pub = self.create_publisher(Marker, '/visualization_marker', 10)
@@ -87,14 +100,39 @@ class RectangleVisualizer(Node):
         """更新当前关节角度"""
         self.current_angles = [float(angle) for angle in joint_angles]
 
-    def interpolate_path(self, start_point, end_point, num_points=150):
-        """在两点之间插值生成平滑路径"""
+    def interpolate_path(self, start_point, end_point, num_points=30):
+        """在两点之间插值生成平滑路径
+        
+        Args:
+            start_point: 起始点
+            end_point: 终点
+            num_points: 插值点数量，默认30个点
+        """
         path = []
         for i in range(num_points):
             t = i / (num_points - 1)
             point = start_point * (1 - t) + end_point * t
             path.append(point)
         return path
+
+    def filter_joint_angles(self, current_angles, target_angles, min_change_threshold=0.02):
+        """过滤掉变化太小的关节角度
+        
+        Args:
+            current_angles: 当前关节角度
+            target_angles: 目标关节角度
+            min_change_threshold: 最小角度变化阈值（弧度）
+        
+        Returns:
+            bool: 如果角度变化大于阈值返回True，否则返回False
+        """
+        if current_angles is None:
+            return True
+            
+        # 计算角度变化
+        angle_changes = [abs(t - c) for c, t in zip(current_angles, target_angles)]
+        # 如果任何一个关节的角度变化大于阈值，则认为需要移动
+        return any(change > min_change_threshold for change in angle_changes)
 
     def is_point_in_list(self, point, points_list, tolerance=1e-6):
         """检查点是否在点列表中"""
@@ -120,7 +158,11 @@ class RectangleVisualizer(Node):
             time.sleep(0.1)
         
         # 预览每个点的关节角度
-        print("\n开始轨迹预览（每段插值150个点）...")
+        print("\n开始轨迹预览（每段插值30个点）...")
+        
+        # 记录上一个点的关节角度，用于下一次运动的初始位置
+        last_joint_angles = None
+        
         for i in range(len(points) - 1):
             print(f"\n预览第 {i+1}/{len(points)-1} 段轨迹")
             
@@ -136,14 +178,21 @@ class RectangleVisualizer(Node):
                 # 设置目标姿态（笔尖垂直向下）
                 target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
                 
-                # 计算逆运动学
-                joint_angles = self.arm.get_joint_angles(target_pose)
+                # 计算逆运动学，使用上一个点的关节角度作为初始位置
+                if last_joint_angles is not None:
+                    # 添加固定关节角度
+                    full_last_angles = [0.0] + list(last_joint_angles) + [0.0]
+                    joint_angles = self.arm.get_joint_angles(target_pose, initial_position=full_last_angles)
+                else:
+                    joint_angles = self.arm.get_joint_angles(target_pose)
+                
                 if joint_angles is None:
                     print(f"警告：无法计算点 {point} 的逆运动学解")
                     continue
                 
                 # 更新当前关节角度（用于可视化）
                 self.current_angles = joint_angles
+                last_joint_angles = joint_angles
                 
                 # 显示关节角度（角度制）
                 if self.is_point_in_list(point, points):  # 只显示关键点的角度
@@ -207,14 +256,6 @@ class RectangleVisualizer(Node):
             # 执行实际运动
             print("\n开始执行实际运动...")
             
-            # 如果是实际硬件模式，只在第一次移动到初始位置
-            if not self.arm.simulation_mode:
-                print("正在移动到初始位置...")
-                if not self.arm.move_to_zero():
-                    print("错误：无法移动到初始位置")
-                    return
-                time.sleep(2)  # 等待稳定
-            
             # 清空实际路径标记
             self.current_path_marker.points = []
             self.current_path_marker.header.stamp = self.get_clock().now().to_msg()
@@ -239,16 +280,28 @@ class RectangleVisualizer(Node):
                     target_pose = np.append(point, [0.0, -np.pi/2, 0.0])  # [x, y, z, roll, pitch, yaw]
                     
                     # 计算逆运动学，使用上一个点的关节角度作为初始位置
-                    joint_angles = self.arm.get_joint_angles(target_pose, initial_position=last_joint_angles)
+                    if last_joint_angles is not None:
+                        # 添加固定关节角度
+                        full_last_angles = [0.0] + list(last_joint_angles) + [0.0]
+                        joint_angles = self.arm.get_joint_angles(target_pose, initial_position=full_last_angles)
+                    else:
+                        joint_angles = self.arm.get_joint_angles(target_pose)
+                    
                     if joint_angles is None:
                         print(f"警告：无法到达点 {point}")
                         continue
                     
-                    # 移动到目标位置
-                    success = self.arm.move_to_joint_angles(joint_angles)
-                    if not success:
-                        print(f"警告：移动到点 {point} 失败")
-                        continue
+                    # 将弧度转换为度数进行显示
+                    joint_angles_deg = [np.degrees(angle) for angle in joint_angles]
+                    print(f"目标点 {point} 的关节角度: {joint_angles_deg}")
+                    
+                    # 检查是否需要移动
+                    if self.filter_joint_angles(last_joint_angles, joint_angles):
+                        # 移动到目标位置（使用弧度）
+                        success = self.arm.move_to_joint_angles(joint_angles)
+                        if not success:
+                            print(f"警告：移动到点 {point} 失败")
+                            continue
                     
                     # 更新实际路径标记
                     self.current_path_marker.points.append(Point(x=point[0], y=point[1], z=point[2]))

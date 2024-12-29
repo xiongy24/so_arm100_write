@@ -22,6 +22,17 @@ class ArmController:
             "jaw_joint": (6, "sts3215")
         }
         
+        # URDF初始位置对应的实际关节角度（弧度）
+        # 这些角度表示从电机零点位置（步数2048）到达URDF初始位置需要转动的角度
+        self.urdf_init_angles = {
+            "shoulder_pan_joint": 0.0,  # 保持不变
+            "shoulder_lift_joint": 0.7854,  # 45度
+            "elbow_joint": 0.0,  # 保持不变
+            "wrist_pitch_joint": -0.7854,  # -45度
+            "wrist_roll_joint": -1.5708,  # -90度
+            "jaw_joint": -0.69813  # -40度
+        }
+        
         # 创建运动控制器
         self.motion_controller = MotionController()
         
@@ -30,11 +41,11 @@ class ArmController:
         
         # 设置关节限制
         self.joint_limits = [
-            [-2.0, 2.0],       # shoulder_pan_joint  (±120度)
+            [-1.57, 1.57],       # shoulder_pan_joint  
             [-1.57, 1.57],     # shoulder_lift_joint (±90度)
             [-1.57, 1.57],     # elbow_joint        (±90度)
             [-1.57, 1.57],     # wrist_pitch_joint  (±90度)
-            [-3.14, 3.14],     # wrist_roll_joint   (±180度)
+            [-1.57, 1.57],     # wrist_roll_joint   
             [-0.78, 0.78],     # jaw_joint          (±45度)
         ]
         
@@ -51,14 +62,31 @@ class ArmController:
         self.simulation_mode = True
 
     def rad_to_steps(self, rad: float) -> int:
-        """将弧度转换为电机步数"""
+        """将弧度转换为电机步数
+        
+        STS3215舵机的步数范围是0-4096
+        0对应-180度
+        2048对应0度（电机零点位置）
+        4096对应180度
+        """
         degree = rad * 180.0 / np.pi
-        steps = int(2048 + (degree * 4096 / 360.0))
+        # 限制角度范围在-180到180度之间
+        degree = np.clip(degree, -180, 180)
+        # 将角度映射到步数范围：-180度对应0步，0度对应2048步，180度对应4096步
+        steps = int(2048 + (degree * 2048 / 180.0))
         return steps
 
     def steps_to_rad(self, steps: int) -> float:
-        """将电机步数转换为弧度"""
-        degree = (steps - 2048) * 360.0 / 4096
+        """将电机步数转换为弧度
+        
+        STS3215舵机的步数范围是0-4096
+        0对应-180度
+        2048对应0度（电机零点位置）
+        4096对应180度
+        """
+        # 将步数转换为角度：0步对应-180度，2048步对应0度，4096步对应180度
+        degree = (steps - 2048) * 180.0 / 2048.0
+        # 将角度转换为弧度
         rad = degree * np.pi / 180.0
         return rad
 
@@ -123,14 +151,30 @@ class ArmController:
             print(f"Error getting current joints: {e}")
             return None
 
-    def get_joint_angles(self, target_pose):
-        """计算给定目标位姿的逆运动学解"""
+    def get_joint_angles(self, target_pose, initial_position=None):
+        """计算给定目标位姿的逆运动学解
+        
+        Args:
+            target_pose: 目标位姿 [x, y, z, roll, pitch, yaw]
+            initial_position: 可选的初始关节角度，如果不提供则使用当前关节角度
+        """
         try:
-            # 创建完整的初始位置（包括固定关节）
-            initial_position = [0.0]  # base_link (固定)
-            initial_position.extend(self.current_joints[:5])  # 前5个活动关节
-            initial_position.append(0.0)  # jaw_joint固定为0
-            initial_position.append(0.0)  # pen_point_joint (固定)
+            # 如果没有提供初始位置，使用当前关节角度
+            if initial_position is None:
+                # 创建完整的初始位置（包括固定关节）
+                initial_position = [0.0]  # base_link (固定)
+                # 当前关节角度已经是相对于URDF初始位置的角度，无需转换
+                initial_position.extend(self.current_joints[:5])  # 前5个活动关节
+                initial_position.append(0.0)  # jaw_joint固定为0
+                initial_position.append(0.0)  # pen_point_joint (固定)
+            else:
+                # 确保提供的初始位置是完整的（8个关节）
+                if len(initial_position) != 8:
+                    # 如果提供的是只有活动关节的角度，添加固定关节
+                    if len(initial_position) == 6:
+                        initial_position = [0.0] + list(initial_position) + [0.0]
+                    else:
+                        raise ValueError(f"初始位置应该包含6个或8个关节角度，得到了 {len(initial_position)} 个")
             
             # 使用IKPY计算逆运动学
             joint_angles = self.chain.inverse_kinematics(
@@ -154,8 +198,6 @@ class ArmController:
                     print(f"警告：关节 {i+1} 角度 {np.degrees(angle):.2f}° 超出限制范围 [{np.degrees(self.joint_limits[i][0]):.2f}°, {np.degrees(self.joint_limits[i][1]):.2f}°]")
                     return None
             
-            # 更新当前关节角度
-            self.current_joints = active_joint_angles
             return active_joint_angles
             
         except Exception as e:
@@ -163,7 +205,10 @@ class ArmController:
             return None
 
     def move_to_joint_angles(self, target_angles: List[float]) -> bool:
-        """移动到指定的关节角度（弧度）"""
+        """移动到指定的关节角度（弧度）
+        
+        注意：target_angles是相对于URDF初始位置的角度，需要加上URDF初始位置的偏移才是实际电机需要转到的角度
+        """
         try:
             # 检查输入参数
             if len(target_angles) != len(self.motors):
@@ -185,8 +230,14 @@ class ArmController:
                 if not self.bus:
                     return False
                 
-                # 将目标角度转换为电机步数
-                target_positions = [self.rad_to_steps(angle) for angle in target_angles]
+                # 将目标角度转换为实际电机角度（加上URDF初始位置的偏移）
+                actual_target_angles = []
+                for i, (joint_name, _) in enumerate(self.motors.items()):
+                    actual_angle = target_angles[i] + self.urdf_init_angles[joint_name]
+                    actual_target_angles.append(actual_angle)
+                
+                # 将实际目标角度转换为电机步数
+                target_positions = [self.rad_to_steps(angle) for angle in actual_target_angles]
                 
                 # 获取当前位置
                 current_positions = []
@@ -206,7 +257,7 @@ class ArmController:
                         self.bus.write("Goal_Position", positions[i], joint_name)
                     time.sleep(0.02)  # 50Hz控制频率
                 
-                # 更新当前关节角度
+                # 更新当前关节角度（保存的是相对于URDF初始位置的角度）
                 self.current_joints = target_angles
                 return True
             
@@ -279,23 +330,23 @@ class ArmController:
             return False
 
     def move_to_urdf_init(self) -> bool:
-        """移动到URDF文件中定义的初始位置"""
-        if not self.bus:
-            print("Not connected to the arm")
-            return False
-        
+        """移动到URDF初始位置"""
         try:
-            print("Moving to URDF initial position...")
-            # 计算每个关节的目标位置（弧度）
-            init_angles = {
-                "shoulder_pan_joint": 0.0,           # 0度
-                "shoulder_lift_joint": 0.785398,     # 45度
-                "elbow_joint": 0.0,                 # 0度
-                "wrist_pitch_joint": -0.785398,     # -45度
-                "wrist_roll_joint": 1.5708,         # 90度
-                "jaw_joint": -0.698132              # -40度
-            }
-            
+            if self.simulation_mode:
+                self.current_joints = [0.0] * len(self.motors)  # 仿真模式下直接设为0
+                return True
+                
+            # 实际硬件控制代码
+            if not self.bus:
+                print("错误：串口未连接")
+                return False
+                
+            # 将URDF初始位置的关节角度转换为电机步数
+            init_positions = []
+            for joint_name in self.motors.keys():
+                init_angle = self.urdf_init_angles[joint_name]
+                init_positions.append(self.rad_to_steps(init_angle))
+                
             # 获取当前位置
             current_positions = []
             for joint_name in self.motors.keys():
@@ -303,27 +354,21 @@ class ArmController:
                 if pos is None:
                     return False
                 current_positions.append(pos)
-            
-            # 计算目标位置
-            target_positions = []
-            for joint_name in self.motors.keys():
-                angle = init_angles[joint_name]
-                steps = self.rad_to_steps(angle)
-                target_positions.append(steps)
-            
+                
             # 生成平滑路径
-            path = self.interpolate_path(current_positions, target_positions)
+            path_points = self.interpolate_path(current_positions, init_positions)
             
-            # 执行平滑运动
+            # 执行运动
             joint_names = list(self.motors.keys())
-            for positions in path:
+            for positions in path_points:
                 for i, joint_name in enumerate(joint_names):
                     self.bus.write("Goal_Position", positions[i], joint_name)
-                time.sleep(0.02)  # 50Hz的更新频率
-            
-            time.sleep(0.5)  # 最后等待稳定
+                time.sleep(0.02)  # 50Hz控制频率
+                
+            # 更新当前关节角度为URDF中的0位置
+            self.current_joints = [0.0] * len(self.motors)
             return True
             
         except Exception as e:
-            print(f"Move to URDF init error: {e}")
+            print(f"移动到URDF初始位置时出错: {str(e)}")
             return False
