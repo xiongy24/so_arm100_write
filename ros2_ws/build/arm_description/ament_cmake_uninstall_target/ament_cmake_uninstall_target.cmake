@@ -55,6 +55,3 @@ endforeach()
 message(STATUS "Execute custom uninstall script")
 
 # begin of custom uninstall code
-
-# uninstall files installed using the symlink install functions
-include("/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description/ament_cmake_symlink_install/ament_cmake_symlink_install_uninstall_script.cmake")

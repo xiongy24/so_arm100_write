@@ -1,0 +1,66 @@
+[0.013s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /home/ubuntu22/.local/bin/cmake /home/ubuntu22/so_arm100_write/ros2_ws/src/arm_description -DCMAKE_INSTALL_PREFIX=/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description
+[0.195s] -- The C compiler identification is GNU 11.4.0
+[0.195s] [0mCMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+[0.195s]   Compatibility with CMake < 3.10 will be removed from a future version of
+[0.196s]   CMake.
+[0.196s] 
+[0.196s]   Update the VERSION argument <min> value or use a ...<max> suffix to tell
+[0.196s]   CMake that the project does not need compatibility with older versions.
+[0.196s] 
+[0.196s] [0m
+[0.202s] -- The CXX compiler identification is GNU 11.4.0
+[0.210s] -- Detecting C compiler ABI info
+[0.256s] -- Detecting C compiler ABI info - done
+[0.266s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.266s] -- Detecting C compile features
+[0.267s] -- Detecting C compile features - done
+[0.276s] -- Detecting CXX compiler ABI info
+[0.326s] -- Detecting CXX compiler ABI info - done
+[0.337s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.337s] -- Detecting CXX compile features
+[0.338s] -- Detecting CXX compile features - done
+[0.346s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.459s] -- Found Python3: /home/ubuntu22/anaconda3/bin/python3 (found version "3.10.9") found components: Interpreter
+[0.601s] -- Configuring done (0.5s)
+[0.602s] -- Generating done (0.0s)
+[0.603s] -- Build files have been written to: /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description
+[0.606s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /home/ubuntu22/.local/bin/cmake /home/ubuntu22/so_arm100_write/ros2_ws/src/arm_description -DCMAKE_INSTALL_PREFIX=/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description
+[0.608s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /home/ubuntu22/.local/bin/cmake --build /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description -- -j16 -l16
+[0.672s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /home/ubuntu22/.local/bin/cmake --build /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description -- -j16 -l16
+[0.723s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /home/ubuntu22/.local/bin/cmake --install /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description
+[0.775s] -- Install configuration: ""
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/config
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/config/display.rviz
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/config/joint_names_so_arm100_write.yaml
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/launch
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/launch/display.launch.py
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/launch/display.launch
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/launch/gazebo.launch
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/base_link.STL
+[0.775s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/jaw_link.STL
+[0.776s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/shoulder_link.STL
+[0.776s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/pen_point_link.STL
+[0.776s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/wrist_2_link.STL
+[0.776s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/forearm_link.STL
+[0.776s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/wrist_1_link.STL
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/meshes/upper_arm_link.STL
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/urdf
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/urdf/so_arm100_write.csv
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/urdf/so_arm100_write.urdf
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/ament_index/resource_index/package_run_dependencies/arm_description
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/ament_index/resource_index/parent_prefix_path/arm_description
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/environment/ament_prefix_path.sh
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/environment/ament_prefix_path.dsv
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/environment/path.sh
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/environment/path.dsv
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/local_setup.bash
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/local_setup.sh
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/local_setup.zsh
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/local_setup.dsv
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.dsv
+[0.777s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/ament_index/resource_index/packages/arm_description
+[0.778s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/cmake/arm_descriptionConfig.cmake
+[0.778s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/cmake/arm_descriptionConfig-version.cmake
+[0.778s] -- Installing: /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_description/share/arm_description/package.xml
+[0.779s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning:/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /home/ubuntu22/.local/bin/cmake --install /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_description

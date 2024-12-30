@@ -1,0 +1,33 @@
+[0.644s] Invoking command in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_planning': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/arm_planning build --build-base /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build install --record /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/install.log --single-version-externally-managed install_data
+[0.810s] running egg_info
+[0.810s] creating ../../build/arm_planning/arm_planning.egg-info
+[0.811s] writing ../../build/arm_planning/arm_planning.egg-info/PKG-INFO
+[0.811s] writing dependency_links to ../../build/arm_planning/arm_planning.egg-info/dependency_links.txt
+[0.811s] writing entry points to ../../build/arm_planning/arm_planning.egg-info/entry_points.txt
+[0.811s] writing requirements to ../../build/arm_planning/arm_planning.egg-info/requires.txt
+[0.811s] writing top-level names to ../../build/arm_planning/arm_planning.egg-info/top_level.txt
+[0.811s] writing manifest file '../../build/arm_planning/arm_planning.egg-info/SOURCES.txt'
+[0.812s] reading manifest file '../../build/arm_planning/arm_planning.egg-info/SOURCES.txt'
+[0.812s] writing manifest file '../../build/arm_planning/arm_planning.egg-info/SOURCES.txt'
+[0.812s] running build
+[0.812s] running build_py
+[0.812s] creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build
+[0.812s] creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build/lib
+[0.813s] creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build/lib/arm_planning
+[0.813s] copying arm_planning/__init__.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build/lib/arm_planning
+[0.813s] running install
+[0.813s] running install_lib
+[0.813s] creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages/arm_planning
+[0.813s] copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build/lib/arm_planning/__init__.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages/arm_planning
+[0.814s] byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages/arm_planning/__init__.py to __init__.cpython-310.pyc
+[0.814s] running install_data
+[0.814s] creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/ament_index
+[0.814s] creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/ament_index/resource_index
+[0.814s] creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/ament_index/resource_index/packages
+[0.814s] copying resource/arm_planning -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/ament_index/resource_index/packages
+[0.814s] copying package.xml -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/share/arm_planning
+[0.814s] running install_egg_info
+[0.815s] Copying ../../build/arm_planning/arm_planning.egg-info to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages/arm_planning-0.0.0-py3.10.egg-info
+[0.815s] running install_scripts
+[0.829s] writing list of installed files to '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/install.log'
+[0.845s] Invoked command in '/home/ubuntu22/so_arm100_write/ros2_ws/src/arm_planning' returned '0': CONDA_PROMPT_MODIFIER=(base) PYTHONPATH=/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ubuntu22/so_arm100_write/ros2_ws/install/arm_planning/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/arm_planning build --build-base /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/build install --record /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_planning/install.log --single-version-externally-managed install_data

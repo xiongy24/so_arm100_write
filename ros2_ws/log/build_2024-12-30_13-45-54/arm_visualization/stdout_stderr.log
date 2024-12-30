@@ -1,0 +1,59 @@
+running egg_info
+creating ../../build/arm_visualization/arm_visualization.egg-info
+writing ../../build/arm_visualization/arm_visualization.egg-info/PKG-INFO
+writing dependency_links to ../../build/arm_visualization/arm_visualization.egg-info/dependency_links.txt
+writing entry points to ../../build/arm_visualization/arm_visualization.egg-info/entry_points.txt
+writing requirements to ../../build/arm_visualization/arm_visualization.egg-info/requires.txt
+writing top-level names to ../../build/arm_visualization/arm_visualization.egg-info/top_level.txt
+writing manifest file '../../build/arm_visualization/arm_visualization.egg-info/SOURCES.txt'
+reading manifest file '../../build/arm_visualization/arm_visualization.egg-info/SOURCES.txt'
+writing manifest file '../../build/arm_visualization/arm_visualization.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build
+creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib
+creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+copying arm_visualization/__init__.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+copying arm_visualization/motion_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+copying arm_visualization/rectangle_gui_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+copying arm_visualization/rectangle_visualizer.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+copying arm_visualization/arm_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+copying arm_visualization/trajectory_generator.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization
+creating /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors
+copying arm_visualization/motors/feetech.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors
+copying arm_visualization/motors/utils.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors
+copying arm_visualization/motors/dynamixel.py -> /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors
+running install
+running install_lib
+creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/__init__.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motion_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/rectangle_gui_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/rectangle_visualizer.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/arm_controller.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/trajectory_generator.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization
+creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors/feetech.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors/utils.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors
+copying /home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/build/lib/arm_visualization/motors/dynamixel.py -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motion_controller.py to motion_controller.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/rectangle_gui_controller.py to rectangle_gui_controller.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/rectangle_visualizer.py to rectangle_visualizer.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/arm_controller.py to arm_controller.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/trajectory_generator.py to trajectory_generator.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors/feetech.py to feetech.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors/utils.py to utils.cpython-310.pyc
+byte-compiling /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization/motors/dynamixel.py to dynamixel.cpython-310.pyc
+running install_data
+creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/ament_index
+creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/ament_index/resource_index
+creating /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/ament_index/resource_index/packages
+copying resource/arm_visualization -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/ament_index/resource_index/packages
+copying package.xml -> /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/share/arm_visualization
+running install_egg_info
+Copying ../../build/arm_visualization/arm_visualization.egg-info to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/python3.10/site-packages/arm_visualization-0.0.0-py3.10.egg-info
+running install_scripts
+Installing rectangle_gui script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+Installing rectangle_visualizer script to /home/ubuntu22/so_arm100_write/ros2_ws/install/arm_visualization/lib/arm_visualization
+writing list of installed files to '/home/ubuntu22/so_arm100_write/ros2_ws/build/arm_visualization/install.log'
